@@ -156,6 +156,12 @@ class MailRoutingTest extends TestCase {
 
 		$this->assertFalse( $result['response'] );
 		$this->assertSame( 'send-failed', $result['error'] );
+		$this->assertSame( array( 'subscriber@example.com' ), $this->method->errorMapper->subscribers );
+
+		$GLOBALS['omppm_test_mail_result'] = true;
+		$this->assertTrue( $this->send_with_type( 'newsletter', array( 'subject' => 'Next' ), 'next@example.com' )['response'] );
+		$this->assertSame( 'next@example.com', $GLOBALS['omppm_test_mail_log'][1]['to'] );
+		$this->assertCount( 0, $this->method->parentSendCalls );
 	}
 
 	public function test_configuration_exception_maps_to_error_and_resets_guard(): void {
@@ -167,6 +173,23 @@ class MailRoutingTest extends TestCase {
 		$follow_up = $this->send_with_type( 'newsletter' );
 		$this->assertSame( array( 'response' => true ), $follow_up );
 		$this->assertCount( 1, $GLOBALS['omppm_test_mail_log'] );
+	}
+
+	public function test_transport_exception_preserves_original_subscriber_and_resets_guard(): void {
+		$GLOBALS['omppm_test_mail_result'] = static function () {
+			throw new \Exception( 'transport failed' );
+		};
+
+		$result = $this->send_with_type( 'newsletter' );
+		$this->assertFalse( $result['response'] );
+		$this->assertSame( 'exception:transport failed', $result['error'] );
+		$this->assertSame( array( 'subscriber@example.com' ), $this->method->errorMapper->subscribers );
+		$this->assertCount( 1, $GLOBALS['omppm_test_mail_log'] );
+
+		$GLOBALS['omppm_test_mail_result'] = true;
+		$this->assertTrue( $this->send_with_type( 'newsletter', array( 'subject' => 'Next' ), 'next@example.com' )['response'] );
+		$this->assertSame( 'next@example.com', $GLOBALS['omppm_test_mail_log'][1]['to'] );
+		$this->assertCount( 0, $this->method->parentSendCalls );
 	}
 
 	public function test_recursion_guard_delegates_to_original_path(): void {

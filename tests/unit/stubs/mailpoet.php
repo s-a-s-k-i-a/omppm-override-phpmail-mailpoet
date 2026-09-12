@@ -97,6 +97,9 @@ namespace MailPoet\Mailer\Methods {
 	 */
 	class TestErrorMapper {
 
+		/** @var array Original subscriber values received by the mapper. */
+		public $subscribers = array();
+
 		/**
 		 * @param mixed $subscriber Subscriber.
 		 * @return string
@@ -112,6 +115,7 @@ namespace MailPoet\Mailer\Methods {
 		 * @return string
 		 */
 		public function getErrorFromException( $exception, $subscriber ) {
+			$this->subscribers[] = $subscriber;
 			return 'exception:' . $exception->getMessage();
 		}
 
@@ -120,6 +124,7 @@ namespace MailPoet\Mailer\Methods {
 		 * @return string
 		 */
 		public function getErrorForSubscriber( $subscriber ) {
+			$this->subscribers[] = $subscriber;
 			return 'send-failed';
 		}
 	}

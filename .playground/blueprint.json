@@ -25,6 +25,10 @@
     {
       "step": "wp-cli",
       "command": "wp eval-file /wordpress/wp-content/plugins/omppm-override-phpmail-mailpoet/tests/playground/assert-alias.php"
+    },
+    {
+      "step": "wp-cli",
+      "command": "wp eval-file /wordpress/wp-content/plugins/omppm-override-phpmail-mailpoet/tests/playground/assert-error-contract.php"
     }
   ]
 }

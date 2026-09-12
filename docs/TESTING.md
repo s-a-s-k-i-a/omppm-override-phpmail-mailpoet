@@ -26,3 +26,12 @@ The test pyramid has four layers:
 For release testing, record WordPress, PHP, MailPoet, SMTP-plugin and browser
 versions, the exact emails sent, and where their delivery was verified. Debug
 log excerpts in issues must mask recipient addresses (see issue #4).
+
+The Playground blueprint also runs `tests/playground/assert-error-contract.php`
+against the installed MailPoet's real mapper and error classes. It intercepts
+`wp_mail()` before transport and checks false returns, transport exceptions,
+plain and named recipient strings, the error formatter used by the queue's hard
+error handler, and subsequent sends on the same instance. This catches the
+issue #8 array/string defect; it does not exercise SMTP or run a newsletter
+worker. Native hard errors still pause sending. The disposable SMTP and queue
+smokes above remain required before release.

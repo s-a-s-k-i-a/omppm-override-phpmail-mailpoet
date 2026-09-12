@@ -358,14 +358,15 @@ class MyPHPMailOverride extends BasePHPMailerMethod {
             self::$is_sending = true;
             
             $mailer = $this->configureMailerWithMessage($newsletter, $subscriber, $extraParams);
-            $subscriber = $this->processSubscriber($subscriber);
+            // Keep the original string for MailPoet error mapping and queue consumers.
+            $processedSubscriber = $this->processSubscriber($subscriber);
             
             // Use array destructuring for PHP 7.1+, fallback for older versions
             if (version_compare(PHP_VERSION, '7.1.0', '>=')) {
-                ['email' => $to] = $subscriber + ['email' => ''];
+                ['email' => $to] = $processedSubscriber + ['email' => ''];
             } else {
                 // Fallback for older PHP versions
-                $to = isset($subscriber['email']) ? $subscriber['email'] : '';
+                $to = isset($processedSubscriber['email']) ? $processedSubscriber['email'] : '';
             }
             $subject = $mailer->Subject;
             $body = $mailer->Body;
