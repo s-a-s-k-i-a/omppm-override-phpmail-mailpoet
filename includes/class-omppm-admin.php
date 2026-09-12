@@ -110,7 +110,7 @@ class OMPPM_Admin {
                 'debug_disabled' => esc_html__('Debug disabled', 'omppm-override-phpmail-mailpoet'),
                 'logs_cleared' => esc_html__('Logs cleared', 'omppm-override-phpmail-mailpoet'),
                 'error' => esc_html__('Error occurred', 'omppm-override-phpmail-mailpoet'),
-                'confirm_clear_logs' => esc_html__('Are you sure you want to delete all debug logs?', 'omppm-override-phpmail-mailpoet'),
+                'confirm_clear_logs' => esc_html__('Clear the stored SMTP Mail Control diagnostic events?', 'omppm-override-phpmail-mailpoet'),
                 'log_status_updated' => esc_html__('Log status updated', 'omppm-override-phpmail-mailpoet'),
                 'test_email_error' => esc_html__('Error sending test email', 'omppm-override-phpmail-mailpoet'),
                 'test_email_error_details' => esc_html__('Error sending test email:', 'omppm-override-phpmail-mailpoet'),
@@ -125,9 +125,8 @@ class OMPPM_Admin {
      */
     public function render_admin_page() {
         $debug_enabled = get_option($this->debug_option, false);
-        $log_file = WP_CONTENT_DIR . '/debug.log';
-        $log_exists = file_exists($log_file);
-        $log_size = $log_exists ? size_format(filesize($log_file)) : '0 B';
+        $events = get_option('omppm_debug_events', []);
+        $events = is_array($events) ? $events : [];
         
         ?>
         <div class="wrap omppm-admin">
@@ -164,8 +163,8 @@ class OMPPM_Admin {
                         <div class="omppm-debug-info">
                             <p><strong><?php esc_html_e('What happens during debug?', 'omppm-override-phpmail-mailpoet'); ?></strong></p>
                             <ul>
-                                <li><?php esc_html_e('Detailed logs are written to debug.log', 'omppm-override-phpmail-mailpoet'); ?></li>
-                                <li><?php esc_html_e('Email delivery is logged step by step', 'omppm-override-phpmail-mailpoet'); ?></li>
+                                <li><?php esc_html_e('Diagnostic event codes are stored privately in the WordPress database', 'omppm-override-phpmail-mailpoet'); ?></li>
+                                <li><?php esc_html_e('No recipient, message or SMTP error details are stored', 'omppm-override-phpmail-mailpoet'); ?></li>
                                 <li><?php esc_html_e('Plugin initialization is monitored', 'omppm-override-phpmail-mailpoet'); ?></li>
                             </ul>
                         </div>
@@ -180,15 +179,13 @@ class OMPPM_Admin {
                     <div class="omppm-card-body">
                         <div class="omppm-log-info">
                             <p><strong><?php esc_html_e('Debug Log Status:', 'omppm-override-phpmail-mailpoet'); ?></strong></p>
-                            <ul>
-                                <li><?php esc_html_e('File:', 'omppm-override-phpmail-mailpoet'); ?> <code><?php echo esc_html($log_file); ?></code></li>
-                                <li><?php esc_html_e('Exists:', 'omppm-override-phpmail-mailpoet'); ?> 
-                                    <span class="<?php echo $log_exists ? 'omppm-success' : 'omppm-warning'; ?>">
-                                        <?php echo $log_exists ? esc_html__('Yes', 'omppm-override-phpmail-mailpoet') : esc_html__('No', 'omppm-override-phpmail-mailpoet'); ?>
-                                    </span>
-                                </li>
-                                <li><?php esc_html_e('Size:', 'omppm-override-phpmail-mailpoet'); ?> <code><?php echo esc_html($log_size); ?></code></li>
-                            </ul>
+                            <p><?php esc_html_e('The latest 100 diagnostic events are stored privately in the WordPress database. No email addresses, subjects, message bodies or SMTP error text are stored.', 'omppm-override-phpmail-mailpoet'); ?></p>
+                            <p><?php esc_html_e('Stored events:', 'omppm-override-phpmail-mailpoet'); ?> <?php echo count($events); ?></p>
+                            <pre><?php foreach ($events as $event) {
+                                if (is_array($event)) {
+                                    echo esc_html(($event['time'] ?? '') . ' UTC ' . ($event['event'] ?? '') . "\n");
+                                }
+                            } ?></pre>
                         </div>
                         
                         <div class="omppm-log-actions">
@@ -395,7 +392,7 @@ class OMPPM_Admin {
                                     <ul>
                                         <li><?php esc_html_e('Enable debug logging above', 'omppm-override-phpmail-mailpoet'); ?></li>
                                         <li><?php esc_html_e('Send a test email via MailPoet', 'omppm-override-phpmail-mailpoet'); ?></li>
-                                        <li><?php esc_html_e('Check the debug.log file for SMTP Mail Control entries', 'omppm-override-phpmail-mailpoet'); ?></li>
+                                        <li><?php esc_html_e('Review the diagnostic events in Log Management above', 'omppm-override-phpmail-mailpoet'); ?></li>
                                     </ul>
                                 </div>
                             </div>
@@ -503,13 +500,9 @@ class OMPPM_Admin {
             wp_die(esc_html__('No permission', 'omppm-override-phpmail-mailpoet'));
         }
         
-        $log_file = WP_CONTENT_DIR . '/debug.log';
-        $success = false;
-        
-        if (file_exists($log_file) && is_writable($log_file)) {
-            $success = file_put_contents($log_file, '') !== false;
-        }
-        
+        delete_option('omppm_debug_events');
+        $success = get_option('omppm_debug_events', false) === false;
+
         wp_send_json_success([
             'success' => $success,
             'message' => $success ? 
