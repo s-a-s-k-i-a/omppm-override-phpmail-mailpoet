@@ -65,6 +65,10 @@ No. But internally, it uses a "class alias" hack to replace MailPoet's `PHPMail`
 1. **WP Mail SMTP / Gmail**: A typical SMTP settings page where you configure your mailer.  
 2. **MailPoet Settings**: "Server (Standard)" selected as sending method, with this plugin ensuring it routes via `wp_mail()`.
 
+= What does debug mode store? =
+
+When debug is enabled, SMTP Mail Control stores only the latest 100 UTC timestamps and fixed diagnostic event codes in the WordPress database. Tools → SMTP Mail Control displays and clears only these plugin events. Recipient addresses, subjects, message bodies and SMTP error text are not stored. No new entries are written to the shared debug.log file. Older debug.log files are not modified; remove historical personal data through your normal site-maintenance process. Disable debug after troubleshooting. Other mail plugins have their own logging and retention settings.
+
 == Changelog ==
 
 = 1.2.5 =
