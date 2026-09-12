@@ -21,6 +21,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+require_once __DIR__ . '/includes/class-omppm-smtp-error-capture.php';
+
 // Define OMPPM debug constant
 if (!defined('OMPPM_DEBUG')) {
     $debug_enabled = get_option('omppm_debug_enabled', false);
@@ -276,6 +278,7 @@ class MyPHPMailOverride extends BasePHPMailerMethod {
             return MailPoetMailer::formatMailerErrorResult($error);
         }
         
+        $errorCapture = null;
         try {
             $is_mailpoet_mail = true;
             
@@ -348,6 +351,8 @@ class MyPHPMailOverride extends BasePHPMailerMethod {
                 default => "Content-Type: text/html; charset=UTF-8"
             };
             
+            $errorCapture = new SmtpErrorCapture($to, $subject);
+            $errorCapture->start();
             $result = wp_mail($to, $subject, $body, $headers);
             
             if (OMPPM_DEBUG) {
@@ -362,9 +367,10 @@ class MyPHPMailOverride extends BasePHPMailerMethod {
             self::$is_sending = false;
             
             return MailPoetMailer::formatMailerErrorResult(
-                $this->errorMapper->getErrorFromException($e, $subscriber)
+                $errorCapture?->getError($subscriber) ?? $this->errorMapper->getErrorFromException($e, $subscriber)
             );
         } finally {
+            $errorCapture?->stop();
             // Always reset recursion flag when done
             self::$is_sending = false;
         }
@@ -372,7 +378,7 @@ class MyPHPMailOverride extends BasePHPMailerMethod {
         if ($result === true) {
             return MailPoetMailer::formatMailerSendSuccessResult();
         } else {
-            $error = $this->errorMapper->getErrorForSubscriber($subscriber);
+            $error = $errorCapture?->getError($subscriber) ?? $this->errorMapper->getErrorForSubscriber($subscriber);
             return MailPoetMailer::formatMailerErrorResult($error);
         }
     }

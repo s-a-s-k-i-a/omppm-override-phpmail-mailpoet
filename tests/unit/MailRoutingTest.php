@@ -202,4 +202,18 @@ class MailRoutingTest extends TestCase {
 		$this->assertCount( 0, $GLOBALS['omppm_test_mail_log'] );
 		$this->assertCount( 1, $this->method->parentSendCalls );
 	}
+	public function test_captured_wordpress_failure_is_returned_and_hooks_cleaned(): void {
+		$before = $GLOBALS['omppm_test_actions'];
+		$GLOBALS['omppm_test_mail_result'] = static function ( $to, $subject ) {
+			do_action( 'wp_mail_failed', new WP_Error( 'wp_mail_failed', 'Synthetic API failure', array( 'to' => array( $to ), 'subject' => $subject ) ) );
+			return false;
+		};
+		$result = $this->send_with_type( 'newsletter' );
+		$this->assertFalse( $result['response'] );
+		$this->assertSame( 'Synthetic API failure', $result['error']->getMessage() );
+		$this->assertSame( 'hard', $result['error']->getLevel() );
+		$this->assertSame( 'subscriber@example.com', $result['error']->getSubscriberErrors()[0]->getEmail() );
+		$this->assertSame( $before, $GLOBALS['omppm_test_actions'] );
+	}
+
 }

@@ -11,6 +11,16 @@
 
 namespace PHPMailer\PHPMailer {
 
+	class SMTP {
+		public $Debugoutput = 'echo';
+		public $do_debug = 0;
+		public $error = array();
+		public function getError() { return $this->error; }
+		protected function edebug( $line, $level ) {
+			if ( $level <= $this->do_debug && is_callable( $this->Debugoutput ) ) { ($this->Debugoutput)( $line, $level ); }
+		}
+	}
+
 	/**
 	 * Message container stub.
 	 */
@@ -18,6 +28,13 @@ namespace PHPMailer\PHPMailer {
 
 		/** @var string */
 		public $Subject = '';
+		public $Mailer = 'mail';
+		public $SMTPDebug = 0;
+		public $Debugoutput = 'echo';
+		public $recipients = array();
+		private $smtp;
+		public function getAllRecipientAddresses() { return $this->recipients; }
+		public function getSMTPInstance() { return $this->smtp ?? ($this->smtp = new SMTP()); }
 
 		/** @var string */
 		public $Body = '';
@@ -33,6 +50,24 @@ namespace PHPMailer\PHPMailer {
 }
 
 namespace MailPoet\Mailer {
+
+	class SubscriberError {
+		private $email;
+		public function __construct( $email ) { $this->email = $email; }
+		public function getEmail() { return $this->email; }
+	}
+	class MailerError {
+		const OPERATION_SEND = 'send';
+		const LEVEL_HARD = 'hard';
+		const LEVEL_SOFT = 'soft';
+		private $level;
+		private $message;
+		private $errors;
+		public function __construct( $operation, $level, $message, $retry = null, $errors = array() ) { $this->level = $level; $this->message = $message; $this->errors = $errors; }
+		public function getLevel() { return $this->level; }
+		public function getMessage() { return $this->message; }
+		public function getSubscriberErrors() { return $this->errors; }
+	}
 
 	/**
 	 * Result formatting stub.
