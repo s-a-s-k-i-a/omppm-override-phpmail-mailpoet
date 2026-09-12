@@ -56,3 +56,32 @@ The scratch runtime was restarted with the same isolation, and the final plugin 
 - `tests/playground/assert-error-contract.php` passed against the real installed MailPoet classes.
 
 The original limitations above remain unchanged. The test processes were again stopped after this repeat; the SMTP listener was closed and the private MySQL socket removed.
+
+## Completion matrix: real queue worker and controlled fault recovery
+
+The continuation of Issue #8 added a reproducible native harness in `scripts/test-e2e.sh` and `tests/e2e/`. The initial 1.2.5 receipt above remains historical evidence of the original failure and deliberately limited first fix. The subsequent SMTP capture fix additionally identifies narrowly supported permanent recipient responses; the tests below supersede the old open queue/transport items.
+
+The complete harness passed from a newly installed disposable WordPress 7.1, MailPoet 5.38.0, WP Mail SMTP 4.9.0 and PHP 8.5.8/MySQL 8.4.0. It created its own database, downloaded the pinned real plugins, installed isolation before first WordPress boot and removed its own database/SMTP process afterward. No production data or credentials were used.
+
+| Scenario | Observed native queue and SMTP result |
+|---|---|
+| Public worker + cold renderer | Actual Segment/Newsletter/Subscriber membership and running ScheduledTask; public `SendingQueue::process()` rendered MailPoet's SimpleText template from a null rendered-body cache and completed three successful SMTP acceptances. |
+| Public worker + permanent recipient | Success → 550/5.1.1 → success: task completed, processed=3, failed=1, exactly two SMTP acceptances. Failed row retained its recipient-specific error; global subscriber status stayed subscribed. |
+| Focused permanent recipient | Same result through `processQueue()`, including named recipients and real membership records. |
+| Temporary recipient 450 | First healthy recipient processed; remaining two persisted unprocessed with native retry. A new PHP process resumed them after synthetic recovery: all three healthy recipients accepted exactly once, failed=0. |
+| Authentication 535 / connection refusal / greeting timeout | No recipients processed or falsely marked failed/bounced during fault. Native retry persisted. A fresh process after transport recovery processed all three, each accepted once. |
+| Policy 550/5.7.1 | Remained a native hard/retry error rather than a permanent subscriber failure. Fresh-process recovery accepted each recipient once when the synthetic policy fault was removed. |
+| DSN boundary | Accepted messages remained subscribed; real Bounce worker `checkProcessingRequirements()` returned false in host/PHPMail mode. No inbound DSN engine or external mailbox was invented. MailPoet documents manual bounce handling for other sending methods. |
+| Transactional recursion | Real MailPoet `WordpressMailerReplacer`/`WordPressMailer`, real WordPress password reset: two `wp_mail()` calls, bounded native fallback, exactly one SMTP acceptance. For this single process, PHP `mail()` used a fixed `.test`-only shim to the loopback sink; no external sendmail was enabled. |
+
+Retry tests deliberately resume the native MailerLog between controlled runs instead of waiting for the production retry interval. This proves persisted recovery and avoids duplicate healthy sends; it is not a claim about wall-clock cron scheduling. The cold/full cases use the public worker selector. Fault-isolation cases use the real batch worker directly. The harness never equates MailPoet processed/attempt statistics with SMTP acceptance.
+
+### Browser smoke receipt from the owning session
+
+The owning session completed the disposable onboarding with telemetry and external libraries disabled and verified the final Tools/Admin UI:
+
+- MailPoet Settings sending-method test to `browser-test@example.test`: UI success; independently read SMTP receipt `250 2.1.5 OK` followed by exactly one acceptance.
+- Plugin test email to the synthetic administrator: UI success and local transport receipt.
+- Debug enabled and persisted across refresh; only event codes/timestamps displayed. Debug disabled and log cleared through the UI; zero entries persisted afterward.
+
+These browser observations belong to the owning session; this agent independently verified the MailPoet Settings SMTP receipt and exercised the transport/worker harness. The runtime remained available until the owner finished the UI checks.
