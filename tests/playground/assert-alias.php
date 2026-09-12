@@ -3,12 +3,16 @@
  * Playground assertion: the class alias must be active inside a real
  * WordPress instance with MailPoet activated.
  *
- * Executed via: wp eval-file tests/playground/assert-alias.php
+ * Executed by the Playground runPHP step with /omppm-assertions mounted.
  *
  * @package OMPPM
  */
 
 $failures = array();
+if (file_exists('/omppm-assertions/force-failure')) {
+    file_put_contents('/omppm-assertions/negative-reached', 'OMPPM_NEGATIVE');
+    $failures[] = 'Intentional negative control.';
+}
 
 if ( ! class_exists( 'MailPoet\\Mailer\\Mailer' ) ) {
 	$failures[] = 'MailPoet is not active.';
@@ -31,10 +35,10 @@ if ( ! function_exists( 'OMPPM\\omppm_setup_alias' ) ) {
 }
 
 if ( $failures ) {
-	foreach ( $failures as $failure ) {
-		fwrite( STDERR, 'FAIL: ' . $failure . "\n" );
-	}
-	exit( 1 );
+    throw new RuntimeException(implode("\n", $failures));
 }
 
-echo "PASS: MailPoet PHPMail resolves to OMPPM\\MyPHPMailOverride inside a live WordPress + MailPoet instance.\n";
+if (false === file_put_contents('/omppm-assertions/passed', 'OMPPM_ALIAS_PASS')) {
+    throw new RuntimeException('Cannot write assertion receipt.');
+}
+echo "PASS: MailPoet PHPMail resolves to OMPPM\\MyPHPMailOverride inside WordPress.\n";

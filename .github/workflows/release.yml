@@ -9,8 +9,12 @@ permissions:
   contents: write
 
 jobs:
+  required-checks:
+    uses: ./.github/workflows/ci.yml
+
   validate-build-release:
     name: Validate and publish GitHub release
+    needs: required-checks
     runs-on: ubuntu-latest
     steps:
       - name: Check out tag

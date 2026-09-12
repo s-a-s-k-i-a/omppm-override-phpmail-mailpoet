@@ -23,8 +23,8 @@
       "pluginPath": "/wordpress/wp-content/plugins/omppm-override-phpmail-mailpoet/omppm-override-phpmail-mailpoet.php"
     },
     {
-      "step": "wp-cli",
-      "command": "wp eval-file /wordpress/wp-content/plugins/omppm-override-phpmail-mailpoet/tests/playground/assert-alias.php"
+      "step": "runPHP",
+      "code": "<?php require '/wordpress/wp-load.php'; require '/wordpress/wp-content/plugins/omppm-override-phpmail-mailpoet/tests/playground/assert-error-contract.php'; require '/wordpress/wp-content/plugins/omppm-override-phpmail-mailpoet/tests/playground/assert-alias.php';"
     }
   ]
 }

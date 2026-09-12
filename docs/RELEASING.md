@@ -19,3 +19,24 @@
 Never edit SVN independently. If emergency SVN recovery is unavoidable, immediately import the exact committed result back into Git and document the divergence.
 
 Note: SVN tags up to 1.2.4 predate this pipeline and contain versioned `.DS_Store` files (issue #6); from 1.2.5 on, `verify-svn-sync.sh` compares strictly with no junk-file exclusions.
+
+The release workflow calls the same complete CI workflow as pull requests,
+including the PHP matrix, Playground, Plugin Check and native MailPoet SMTP
+E2E. GitHub publication and SVN deployment cannot start if one of these fails.
+The disposable E2E environment contains only generated `.test` recipients
+and sends only to a loopback SMTP catcher.
+
+GitHub settings were read back on 2026-09-12: the repository is public and the
+`wordpress.org` environment requires approval by `s-a-s-k-i-a`. Administrators
+can bypass that environment rule; self-review is permitted and deployment
+branches are unrestricted. At audit time `main` had no branch protection.
+These are control-plane settings, not guarantees enforced by these files;
+read them back before relying on them and record any subsequent changes.
+
+`verify-svn-sync.sh <version>` compares both SVN `trunk` and the numeric tag,
+then verifies the public WordPress.org API version and download URL and
+compares the extracted public ZIP byte-for-byte with the local build. Public
+API/CDN propagation is retried for at most 300 seconds; SVN drift fails
+immediately. `OMPPM_VERIFY_WAIT_SECONDS` may shorten this window (1–300).
+`test-svn-verification.sh` uses synthetic network-command fixtures to prove
+that matching contents pass and trunk, public-version and ZIP drift fail.

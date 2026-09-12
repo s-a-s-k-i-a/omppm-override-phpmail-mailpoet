@@ -2,7 +2,7 @@
 **Contributors:** Jyria
 **Donate link:** https://www.saskialund.de/donate/
 **Tags:** mailpoet, smtp, wp_mail, gmail-api, phpmailer
-**Tested up to:** 6.9
+**Tested up to:** 7.1
 **Requires PHP:** 8.1
 **Stable tag:** 1.2.5
 **License:** GPLv2 or later
@@ -95,10 +95,21 @@ It has been tested with MailPoet 5.x. MailPoet may change internal classes or ar
 ### Does this plugin require code changes in MailPoet? ###
 No. But internally, it uses a "class alias" hack to replace MailPoet's `PHPMail` class on the fly, which can be update-sensitive. If you see errors or your newsletter fails after a MailPoet update, deactivate and re-check plugin compatibility.
 
+### What does debug mode store? ###
+
+When debug is enabled, SMTP Mail Control stores only the latest 100 UTC timestamps and fixed diagnostic event codes in the WordPress database. Tools → SMTP Mail Control displays and clears only these plugin events. Recipient addresses, subjects, message bodies and SMTP error text are not stored. No new entries are written to the shared debug.log file. Older debug.log files are not modified; remove historical personal data through your normal site-maintenance process. Disable debug after troubleshooting. Other mail plugins have their own logging and retention settings.
+
 ## Changelog ##
 
 **1.2.5**
 * Release date: September 12th 2026
+* Fix MailPoet error formatting after a failed send and reliably restore the recursion guard.
+* Continue the newsletter queue after verified permanent SMTP recipient rejections; retain retries for temporary, authentication, connection and policy failures.
+* Replace message-content debug logs with at most 100 private diagnostic events; clearing them preserves the shared WordPress log.
+* Escape admin output, report the actual class alias, and clarify the system-mail test.
+* Verify WordPress 7.1 with MailPoet 5.38.0 and WP Mail SMTP 4.9.0 in an isolated SMTP environment.
+* Require the complete PHP, Playground, Plugin Check and native queue E2E checks before release.
+
 * Minimum PHP requirement corrected to 8.1: the enum-based email type support introduced in 1.2.0 is PHP 8.1+ syntax, so PHP 8.0 sites could never load versions 1.2.0–1.2.4 (parse error at load time)
 * Removed the resulting dead PHP 8.0 fallback code paths
 * The GPL license file now ships with the plugin

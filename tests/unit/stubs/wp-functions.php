@@ -81,3 +81,24 @@ function wp_mail( $to, $subject, $message, $headers = array(), $attachments = ar
 	}
 	return $result;
 }
+
+class WP_Error {
+	private $code;
+	private $message;
+	private $data;
+	public function __construct( $code, $message, $data ) { $this->code = $code; $this->message = $message; $this->data = $data; }
+	public function get_error_code() { return $this->code; }
+	public function get_error_message() { return $this->message; }
+	public function get_error_data() { return $this->data; }
+}
+function remove_action( $hook, $callback, $priority = 10 ) {
+	$GLOBALS['omppm_test_actions'] = array_values( array_filter( $GLOBALS['omppm_test_actions'], static function ( $entry ) use ( $hook, $callback, $priority ) {
+		return $entry[0] !== $hook || $entry[1] !== $callback || $entry[2] !== $priority;
+	} ) );
+	return true;
+}
+function do_action( $hook, ...$args ) {
+	foreach ( $GLOBALS['omppm_test_actions'] as $entry ) {
+		if ( $entry[0] === $hook ) { ($entry[1])( ...array_slice( $args, 0, $entry[3] ) ); }
+	}
+}

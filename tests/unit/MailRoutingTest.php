@@ -156,6 +156,12 @@ class MailRoutingTest extends TestCase {
 
 		$this->assertFalse( $result['response'] );
 		$this->assertSame( 'send-failed', $result['error'] );
+		$this->assertSame( array( 'subscriber@example.com' ), $this->method->errorMapper->subscribers );
+
+		$GLOBALS['omppm_test_mail_result'] = true;
+		$this->assertTrue( $this->send_with_type( 'newsletter', array( 'subject' => 'Next' ), 'next@example.com' )['response'] );
+		$this->assertSame( 'next@example.com', $GLOBALS['omppm_test_mail_log'][1]['to'] );
+		$this->assertCount( 0, $this->method->parentSendCalls );
 	}
 
 	public function test_configuration_exception_maps_to_error_and_resets_guard(): void {
@@ -169,6 +175,25 @@ class MailRoutingTest extends TestCase {
 		$this->assertCount( 1, $GLOBALS['omppm_test_mail_log'] );
 	}
 
+	public function test_transport_exception_preserves_original_subscriber_and_resets_guard(): void {
+		$before = $GLOBALS['omppm_test_actions'];
+		$GLOBALS['omppm_test_mail_result'] = static function () {
+			throw new \Exception( 'transport failed' );
+		};
+
+		$result = $this->send_with_type( 'newsletter' );
+		$this->assertFalse( $result['response'] );
+		$this->assertSame( 'exception:transport failed', $result['error'] );
+		$this->assertSame( $before, $GLOBALS['omppm_test_actions'] );
+		$this->assertSame( array( 'subscriber@example.com' ), $this->method->errorMapper->subscribers );
+		$this->assertCount( 1, $GLOBALS['omppm_test_mail_log'] );
+
+		$GLOBALS['omppm_test_mail_result'] = true;
+		$this->assertTrue( $this->send_with_type( 'newsletter', array( 'subject' => 'Next' ), 'next@example.com' )['response'] );
+		$this->assertSame( 'next@example.com', $GLOBALS['omppm_test_mail_log'][1]['to'] );
+		$this->assertCount( 0, $this->method->parentSendCalls );
+	}
+
 	public function test_recursion_guard_delegates_to_original_path(): void {
 		$flag = new ReflectionProperty( \OMPPM\MyPHPMailOverride::class, 'is_sending' );
 		$flag->setValue( null, true );
@@ -179,4 +204,42 @@ class MailRoutingTest extends TestCase {
 		$this->assertCount( 0, $GLOBALS['omppm_test_mail_log'] );
 		$this->assertCount( 1, $this->method->parentSendCalls );
 	}
+	public function test_captured_wordpress_failure_is_returned_and_hooks_cleaned(): void {
+		$before = $GLOBALS['omppm_test_actions'];
+		$GLOBALS['omppm_test_mail_result'] = static function ( $to, $subject ) {
+			do_action( 'wp_mail_failed', new WP_Error( 'wp_mail_failed', 'Synthetic API failure', array( 'to' => array( $to ), 'subject' => $subject ) ) );
+			return false;
+		};
+		$result = $this->send_with_type( 'newsletter' );
+		$this->assertFalse( $result['response'] );
+		$this->assertSame( 'Synthetic API failure', $result['error']->getMessage() );
+		$this->assertSame( 'hard', $result['error']->getLevel() );
+		$this->assertSame( 'subscriber@example.com', $result['error']->getSubscriberErrors()[0]->getEmail() );
+		$this->assertSame( $before, $GLOBALS['omppm_test_actions'] );
+	}
+
+	public function test_throwing_existing_smtp_callback_restores_hooks_and_debug_settings(): void {
+		$before = $GLOBALS['omppm_test_actions'];
+		$mailer = new \PHPMailer\PHPMailer\PHPMailer();
+		$mailer->Mailer = 'smtp';
+		$mailer->Subject = 'Hello';
+		$mailer->recipients = array( 'subscriber@example.com' => true );
+		$mailer->SMTPDebug = 1;
+		$original = static function () { throw new \Exception( 'Existing diagnostic callback failed' ); };
+		$mailer->Debugoutput = $original;
+		$GLOBALS['omppm_test_mail_result'] = static function () use ( $mailer ) {
+			do_action( 'phpmailer_init', $mailer );
+			($mailer->Debugoutput)( 'SMTP debug event', 1 );
+			return true;
+		};
+		$result = $this->send_with_type( 'newsletter' );
+		$this->assertFalse( $result['response'] );
+		$this->assertSame( $before, $GLOBALS['omppm_test_actions'] );
+		$this->assertSame( $original, $mailer->Debugoutput );
+		$this->assertSame( 1, $mailer->SMTPDebug );
+		$GLOBALS['omppm_test_mail_result'] = true;
+		$this->assertTrue( $this->send_with_type( 'newsletter' )['response'] );
+		$this->assertCount( 0, $this->method->parentSendCalls );
+	}
+
 }
