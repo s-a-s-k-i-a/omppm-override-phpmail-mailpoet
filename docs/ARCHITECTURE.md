@@ -48,7 +48,7 @@ MailPoet method; the flag is always reset in `finally`.
 
 `includes/class-omppm-admin.php` adds a Tools page (capability
 `manage_options`, nonce-protected AJAX) with a debug toggle
-(`omppm_debug_enabled` option → `OMPPM_DEBUG` constant at load), debug.log
+(`omppm_debug_enabled` option → `OMPPM_DEBUG` constant at load), private bounded diagnostic-event
 management, plugin status (MailPoet active, alias active, supported types),
 and a `wp_mail()` test-email button.
 
@@ -59,3 +59,20 @@ and a `wp_mail()` test-email button.
   blacklist, error mapping, and the recursion guard.
 - `tests/playground/assert-alias.php` proves the alias inside a real
   WordPress + MailPoet instance (CI Playground job).
+
+## SMTP failure contract
+
+The original subscriber string remains intact for MailPoet error objects.
+`SmtpErrorCapture` observes only the current WordPress send and restores its
+hooks and PHPMailer diagnostic settings in `finally`. A correlated single
+recipient RCPT rejection with a permanent address/mailbox status becomes a
+subscriber-level sending failure: MailPoet records it and continues the batch.
+Temporary, authentication, connection, policy and unclassified failures retain
+native hard-error retry semantics. No failure is reported as successful.
+This synchronous classification does not mark the subscriber globally bounced
+or process later DSNs. See `docs/TESTING.md` for exact status codes and limits.
+
+`tests/e2e/` runs the actual MailPoet queue, renderer and retry worker against
+an isolated non-relaying SMTP server, including password-reset re-entry. The
+Playground runner requires an in-WordPress completion receipt and deliberately
+checks that a broken assertion fails.
