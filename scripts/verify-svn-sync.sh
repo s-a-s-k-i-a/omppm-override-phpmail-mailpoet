@@ -15,8 +15,5 @@ trap cleanup_comparison_temp EXIT
 unzip -q "$repository_root/dist/$plugin_slug-$release_version.zip" -d "$comparison_temp/github"
 svn export --quiet "https://plugins.svn.wordpress.org/$plugin_slug/tags/$release_version" "$comparison_temp/svn/$plugin_slug"
 
-# Legacy SVN tags up to 1.2.4 contain versioned .DS_Store artifacts (issue #6).
-# Deploys through the Release workflow stay clean; drop these exclusions after
-# the first post-adoption release.
-diff -ru -x '.DS_Store' -x '._*' "$comparison_temp/github/$plugin_slug" "$comparison_temp/svn/$plugin_slug"
+diff -ru "$comparison_temp/github/$plugin_slug" "$comparison_temp/svn/$plugin_slug"
 echo "GitHub release $release_version matches the WordPress.org SVN tag."

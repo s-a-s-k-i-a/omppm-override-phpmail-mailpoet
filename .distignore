@@ -20,9 +20,6 @@
 /phpunit.xml.dist
 /dist
 /.distignore
-# Transitional: the 1.2.4 SVN tag predates this repo and ships no LICENSE
-# file. Remove this exclusion with the first post-adoption release (issue #6).
-/LICENSE
 .phpunit.result.cache
 .DS_Store
 ._*

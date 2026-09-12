@@ -5,9 +5,9 @@ namespace OMPPM;
  * Plugin Name:       SMTP Mail Control for MailPoet
  * Plugin URI:        https://saskialund.de/
  * Description:       The missing link between MailPoet and your SMTP plugin – for reliable email delivery!
- * Version:           1.2.4
+ * Version:           1.2.5
  * Requires at least: 6.5
- * Requires PHP:      8.0
+ * Requires PHP:      8.1
  * Author:            Saskia Teichmann
  * Author URI:        https://saskialund.de
  * License:           GPLv2 or later
@@ -19,17 +19,6 @@ namespace OMPPM;
 // Prevent direct access
 if (!defined('ABSPATH')) {
     exit;
-}
-
-// PHP version compatibility check
-if (version_compare(PHP_VERSION, '8.0.0', '<')) {
-    add_action('admin_notices', function() {
-        echo '<div class="notice notice-error"><p>';
-        echo '<strong>SMTP Mail Control for MailPoet:</strong> ';
-        echo 'This plugin requires PHP 8.0 or higher. Current version: ' . PHP_VERSION;
-        echo '</p></div>';
-    });
-    return;
 }
 
 // Define OMPPM debug constant
@@ -54,42 +43,22 @@ use ReflectionClass;
 use ReflectionException;
 
 /**
- * Email types class for better type safety
- * Uses enum for PHP 8.1+, fallback class for older versions
+ * Email types enum for better type safety
  */
-if (version_compare(PHP_VERSION, '8.1.0', '>=')) {
-    enum EmailType: string {
-        case NEWSLETTER = 'newsletter';
-        case POST_NOTIFICATION = 'post_notification';
-        case WELCOME_EMAIL = 'welcome_email';
-        case AUTOMATIC = 'automatic';
-        case SENDING_TEST = 'sending_test';
-        case CONFIRMATION = 'confirmation';
-        case UNSUBSCRIBE = 'unsubscribe';
-        case RE_ENGAGEMENT = 're_engagement';
-        case TRANSACTIONAL = 'transactional';
-        case NOTIFICATION = 'notification';
-        case PREVIEW = 'preview';
-        case EMAIL_STATS_NOTIFICATION = 'email_stats_notification';
-        case NEW_SUBSCRIBER_NOTIFICATION = 'new_subscriber_notification';
-    }
-} else {
-    // Fallback class for PHP 8.0
-    class EmailType {
-        public const NEWSLETTER = 'newsletter';
-        public const POST_NOTIFICATION = 'post_notification';
-        public const WELCOME_EMAIL = 'welcome_email';
-        public const AUTOMATIC = 'automatic';
-        public const SENDING_TEST = 'sending_test';
-        public const CONFIRMATION = 'confirmation';
-        public const UNSUBSCRIBE = 'unsubscribe';
-        public const RE_ENGAGEMENT = 're_engagement';
-        public const TRANSACTIONAL = 'transactional';
-        public const NOTIFICATION = 'notification';
-        public const PREVIEW = 'preview';
-        public const EMAIL_STATS_NOTIFICATION = 'email_stats_notification';
-        public const NEW_SUBSCRIBER_NOTIFICATION = 'new_subscriber_notification';
-    }
+enum EmailType: string {
+    case NEWSLETTER = 'newsletter';
+    case POST_NOTIFICATION = 'post_notification';
+    case WELCOME_EMAIL = 'welcome_email';
+    case AUTOMATIC = 'automatic';
+    case SENDING_TEST = 'sending_test';
+    case CONFIRMATION = 'confirmation';
+    case UNSUBSCRIBE = 'unsubscribe';
+    case RE_ENGAGEMENT = 're_engagement';
+    case TRANSACTIONAL = 'transactional';
+    case NOTIFICATION = 'notification';
+    case PREVIEW = 'preview';
+    case EMAIL_STATS_NOTIFICATION = 'email_stats_notification';
+    case NEW_SUBSCRIBER_NOTIFICATION = 'new_subscriber_notification';
 }
 
 // Load admin interface
@@ -173,23 +142,11 @@ class MyPHPMailOverride extends BasePHPMailerMethod {
             error_log('OMPPM: MyPHPMailOverride constructor called');
         }
         
-        // Initialize supported email types with version-specific values
-        $this->supported_email_types = [
-            // Use enum values for PHP 8.1+, constants for older versions
-            version_compare(PHP_VERSION, '8.1.0', '>=') ? EmailType::NEWSLETTER->value : EmailType::NEWSLETTER,
-            version_compare(PHP_VERSION, '8.1.0', '>=') ? EmailType::POST_NOTIFICATION->value : EmailType::POST_NOTIFICATION,
-            version_compare(PHP_VERSION, '8.1.0', '>=') ? EmailType::WELCOME_EMAIL->value : EmailType::WELCOME_EMAIL,
-            version_compare(PHP_VERSION, '8.1.0', '>=') ? EmailType::AUTOMATIC->value : EmailType::AUTOMATIC,
-            version_compare(PHP_VERSION, '8.1.0', '>=') ? EmailType::SENDING_TEST->value : EmailType::SENDING_TEST,
-            version_compare(PHP_VERSION, '8.1.0', '>=') ? EmailType::CONFIRMATION->value : EmailType::CONFIRMATION,
-            version_compare(PHP_VERSION, '8.1.0', '>=') ? EmailType::UNSUBSCRIBE->value : EmailType::UNSUBSCRIBE,
-            version_compare(PHP_VERSION, '8.1.0', '>=') ? EmailType::RE_ENGAGEMENT->value : EmailType::RE_ENGAGEMENT,
-            version_compare(PHP_VERSION, '8.1.0', '>=') ? EmailType::TRANSACTIONAL->value : EmailType::TRANSACTIONAL,
-            version_compare(PHP_VERSION, '8.1.0', '>=') ? EmailType::NOTIFICATION->value : EmailType::NOTIFICATION,
-            version_compare(PHP_VERSION, '8.1.0', '>=') ? EmailType::PREVIEW->value : EmailType::PREVIEW,
-            version_compare(PHP_VERSION, '8.1.0', '>=') ? EmailType::EMAIL_STATS_NOTIFICATION->value : EmailType::EMAIL_STATS_NOTIFICATION,
-            version_compare(PHP_VERSION, '8.1.0', '>=') ? EmailType::NEW_SUBSCRIBER_NOTIFICATION->value : EmailType::NEW_SUBSCRIBER_NOTIFICATION
-        ];
+        // Initialize supported email types
+        $this->supported_email_types = array_map(
+            static fn(EmailType $email_type): string => $email_type->value,
+            EmailType::cases()
+        );
         
         // Call parent constructor first to set up properties
         parent::__construct($sender, $replyTo, $returnPath, $errorMapper, $urlUtils);
@@ -217,20 +174,11 @@ class MyPHPMailOverride extends BasePHPMailerMethod {
         }
         
         // Direct match with our supported email types
-        if (version_compare(PHP_VERSION, '8.0.0', '>=')) {
-            if (in_array($email_type, $this->supported_email_types, strict: true)) {
-                if (OMPPM_DEBUG) {
-                    error_log("OMPPM: Supported email type matched: " . $email_type);
-                }
-                return true;
+        if (in_array($email_type, $this->supported_email_types, true)) {
+            if (OMPPM_DEBUG) {
+                error_log("OMPPM: Supported email type matched: " . $email_type);
             }
-        } else {
-            if (in_array($email_type, $this->supported_email_types, true)) {
-                if (OMPPM_DEBUG) {
-                    error_log("OMPPM: Supported email type matched: " . $email_type);
-                }
-                return true;
-            }
+            return true;
         }
         
         // Pattern matching for automatic emails (automatic_{group}_{event})
@@ -360,13 +308,7 @@ class MyPHPMailOverride extends BasePHPMailerMethod {
             $mailer = $this->configureMailerWithMessage($newsletter, $subscriber, $extraParams);
             $subscriber = $this->processSubscriber($subscriber);
             
-            // Use array destructuring for PHP 7.1+, fallback for older versions
-            if (version_compare(PHP_VERSION, '7.1.0', '>=')) {
-                ['email' => $to] = $subscriber + ['email' => ''];
-            } else {
-                // Fallback for older PHP versions
-                $to = isset($subscriber['email']) ? $subscriber['email'] : '';
-            }
+            ['email' => $to] = $subscriber + ['email' => ''];
             $subject = $mailer->Subject;
             $body = $mailer->Body;
             
@@ -400,20 +342,10 @@ class MyPHPMailOverride extends BasePHPMailerMethod {
                 $headers[] = "Reply-To: {$reply_to_name} <{$reply_to_email}>";
             }
             
-            // Use match expression for PHP 8.0+, fallback for older versions
-            if (version_compare(PHP_VERSION, '8.0.0', '>=')) {
-                $headers[] = match($mailer->ContentType) {
-                    "text/plain" => "Content-Type: text/plain; charset=UTF-8",
-                    default => "Content-Type: text/html; charset=UTF-8"
-                };
-            } else {
-                // Fallback for older PHP versions
-                if ($mailer->ContentType === "text/plain") {
-                    $headers[] = "Content-Type: text/plain; charset=UTF-8";
-                } else {
-                    $headers[] = "Content-Type: text/html; charset=UTF-8";
-                }
-            }
+            $headers[] = match($mailer->ContentType) {
+                "text/plain" => "Content-Type: text/plain; charset=UTF-8",
+                default => "Content-Type: text/html; charset=UTF-8"
+            };
             
             $result = wp_mail($to, $subject, $body, $headers);
             

@@ -13,12 +13,6 @@
   <arg value="sp"/>
   <arg name="extensions" value="php"/>
 
-  <!--
-    The published plugin still declares "Requires PHP: 8.0", but the enum
-    declaration in the main file is PHP 8.1+ syntax, so 8.1 is the factual
-    minimum this code base parses on. Issue #1 tracks aligning the declared
-    requirement; adjust testVersion together with that fix.
-  -->
   <rule ref="PHPCompatibilityWP">
     <properties>
       <property name="testVersion" value="8.1-"/>

@@ -3,7 +3,8 @@ Contributors: Jyria
 Donate link: https://www.saskialund.de/donate/
 Tags: mailpoet, smtp, wp_mail, gmail-api, phpmailer
 Tested up to: 6.9
-Stable tag: 1.2.4
+Requires PHP: 8.1
+Stable tag: 1.2.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +66,15 @@ No. But internally, it uses a "class alias" hack to replace MailPoet's `PHPMail`
 2. **MailPoet Settings**: "Server (Standard)" selected as sending method, with this plugin ensuring it routes via `wp_mail()`.
 
 == Changelog ==
+
+= 1.2.5 =
+
+Release date: September 12th 2026
+
+- Minimum PHP requirement corrected to 8.1: the enum-based email type support introduced in 1.2.0 is PHP 8.1+ syntax, so PHP 8.0 sites could never load versions 1.2.0-1.2.4 (parse error at load time)
+- Removed the resulting dead PHP 8.0 fallback code paths
+- The GPL license file now ships with the plugin
+- Development now happens in the public GitHub repository (issues and contributions welcome): https://github.com/s-a-s-k-i-a/omppm-override-phpmail-mailpoet
 
 = 1.2.4 =
 

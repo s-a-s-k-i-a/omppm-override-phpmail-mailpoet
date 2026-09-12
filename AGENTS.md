@@ -22,7 +22,7 @@ This GitHub repository is the canonical development source. WordPress.org SVN is
 - Never log or commit real subscriber email addresses, mail contents, or SMTP credentials. Debug logging privacy is tracked in issue #4.
 - Do not make deliverability guarantees. Describe deterministic routing behavior and tested conditions precisely.
 - Never place SVN credentials in the repository. GitHub Actions uses the protected `wordpress.org` environment and `SVN_USERNAME`/`SVN_PASSWORD` secrets.
-- The published "Requires PHP: 8.0" claim is factually broken (enum syntax, issue #1); the tooling assumes PHP 8.1 as the real minimum until that issue is resolved.
+- The minimum PHP version is 8.1 (since 1.2.5, issue #1); keep header, readme files, phpcs `testVersion`, and the CI matrix aligned when it changes.
 
 ## Commands
 

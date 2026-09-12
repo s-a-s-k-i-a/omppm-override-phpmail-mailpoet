@@ -18,4 +18,4 @@
 
 Never edit SVN independently. If emergency SVN recovery is unavoidable, immediately import the exact committed result back into Git and document the divergence.
 
-Note: SVN tags up to 1.2.4 predate this pipeline and contain versioned `.DS_Store` files (issue #6); `verify-svn-sync.sh` excludes them from the comparison until the first post-adoption release.
+Note: SVN tags up to 1.2.4 predate this pipeline and contain versioned `.DS_Store` files (issue #6); from 1.2.5 on, `verify-svn-sync.sh` compares strictly with no junk-file exclusions.
