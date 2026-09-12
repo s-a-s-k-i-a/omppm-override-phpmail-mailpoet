@@ -218,4 +218,28 @@ class MailRoutingTest extends TestCase {
 		$this->assertSame( $before, $GLOBALS['omppm_test_actions'] );
 	}
 
+	public function test_throwing_existing_smtp_callback_restores_hooks_and_debug_settings(): void {
+		$before = $GLOBALS['omppm_test_actions'];
+		$mailer = new \PHPMailer\PHPMailer\PHPMailer();
+		$mailer->Mailer = 'smtp';
+		$mailer->Subject = 'Hello';
+		$mailer->recipients = array( 'subscriber@example.com' => true );
+		$mailer->SMTPDebug = 1;
+		$original = static function () { throw new \Exception( 'Existing diagnostic callback failed' ); };
+		$mailer->Debugoutput = $original;
+		$GLOBALS['omppm_test_mail_result'] = static function () use ( $mailer ) {
+			do_action( 'phpmailer_init', $mailer );
+			($mailer->Debugoutput)( 'SMTP debug event', 1 );
+			return true;
+		};
+		$result = $this->send_with_type( 'newsletter' );
+		$this->assertFalse( $result['response'] );
+		$this->assertSame( $before, $GLOBALS['omppm_test_actions'] );
+		$this->assertSame( $original, $mailer->Debugoutput );
+		$this->assertSame( 1, $mailer->SMTPDebug );
+		$GLOBALS['omppm_test_mail_result'] = true;
+		$this->assertTrue( $this->send_with_type( 'newsletter' )['response'] );
+		$this->assertCount( 0, $this->method->parentSendCalls );
+	}
+
 }
