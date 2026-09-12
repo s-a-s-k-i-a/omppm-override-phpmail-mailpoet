@@ -527,14 +527,11 @@ class OMPPM_Admin {
         
         // Prepare email
         $to = $admin_email;
-        $subject = sprintf(esc_html__('[%s] SMTP Mail Control for MailPoet - Test Email', 'omppm-override-phpmail-mailpoet'), $site_name);
+        // translators: %s: Site name.
+        $subject = sprintf(__('[%s] SMTP Mail Control for MailPoet - Test Email', 'omppm-override-phpmail-mailpoet'), $site_name);
         $message = sprintf(
-            __("This is a test email from the SMTP Mail Control Plugin.\n\n" .
-               "Plugin: SMTP Mail Control for MailPoet\n" .
-               "Version: %s\n" .
-               "Timestamp: %s\n\n" .
-               "If you receive this email, the plugin is working correctly and forwarding emails via wp_mail().\n\n" .
-               "Check the logs in your SMTP plugin to confirm that the email was sent via your SMTP settings.", 'omppm-override-phpmail-mailpoet'),
+            // translators: 1: Plugin version, 2: Site-local timestamp.
+            __("This is a WordPress system-mail test from SMTP Mail Control for MailPoet.\n\nPlugin version: %1\$s\nTimestamp: %2\$s\n\nReceiving this message verifies the WordPress mail path. Test MailPoet separately using its Sending settings and verify SMTP acceptance in your SMTP provider or test catcher.", 'omppm-override-phpmail-mailpoet'),
             $this->get_plugin_version(),
             current_time('Y-m-d H:i:s')
         );
@@ -551,7 +548,8 @@ class OMPPM_Admin {
             wp_send_json_success([
                 'success' => true,
                 'message' => sprintf(
-                    esc_html__('Test email successfully sent to %s! Check your email inbox and SMTP logs.', 'omppm-override-phpmail-mailpoet'),
+                    // translators: %s: Administrator email address.
+                    __('Test email successfully sent to %s! Check your email inbox and SMTP logs.', 'omppm-override-phpmail-mailpoet'),
                     $admin_email
                 ),
                 'email' => $admin_email
