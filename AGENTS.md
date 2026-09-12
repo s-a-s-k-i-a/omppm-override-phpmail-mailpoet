@@ -32,7 +32,7 @@ composer test
 composer lint
 find . -path './vendor' -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
 ./scripts/test-playground.sh
-./scripts/build-release.sh 1.2.4
+./scripts/build-release.sh
 ./scripts/verify-svn-sync.sh
 ```
 
