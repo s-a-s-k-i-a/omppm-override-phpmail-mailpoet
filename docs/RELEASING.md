@@ -1,0 +1,21 @@
+# Releasing
+
+## Preconditions
+
+- All issue acceptance criteria and tests are green.
+- Version values match in the plugin header, `OMPPM_Admin::PLUGIN_VERSION`, `readme.txt` stable tag, `README.md` stable tag, and both changelogs (`php scripts/check-version.php` verifies the file side).
+- `Tested up to` reflects a real test, not an assumption.
+- The GitHub `wordpress.org` environment has a required maintainer approval and the `SVN_USERNAME` and `SVN_PASSWORD` secrets.
+- `./scripts/test-release-contents.sh` passes; the build also audits its staged files before creating the ZIP.
+
+## Release
+
+1. Merge the reviewed pull request to `main`.
+2. Create and push a numeric annotated tag, for example `1.2.5`.
+3. The release workflow validates, tests, builds, and publishes the GitHub release ZIP.
+4. After the protected-environment approval, the same tag contents are deployed to WordPress.org SVN `trunk` and `tags/<version>`, and the `.wordpress-org/` banners and icons are synced to the SVN `assets/` directory.
+5. Verify the SVN tag, the public plugin page version, and the downloaded WordPress.org ZIP against the release manifest (`./scripts/verify-svn-sync.sh <version>`).
+
+Never edit SVN independently. If emergency SVN recovery is unavoidable, immediately import the exact committed result back into Git and document the divergence.
+
+Note: SVN tags up to 1.2.4 predate this pipeline and contain versioned `.DS_Store` files (issue #6); `verify-svn-sync.sh` excludes them from the comparison until the first post-adoption release.

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "meta": {
+    "title": "SMTP Mail Control for MailPoet development site",
+    "author": "s-a-s-k-i-a",
+    "description": "Disposable WordPress and MailPoet environment verifying the PHPMail class-alias override."
+  },
+  "preferredVersions": {
+    "php": "8.3",
+    "wp": "latest"
+  },
+  "features": {
+    "networking": true
+  },
+  "login": true,
+  "landingPage": "/wp-admin/",
+  "plugins": [
+    "mailpoet"
+  ],
+  "steps": [
+    {
+      "step": "activatePlugin",
+      "pluginPath": "/wordpress/wp-content/plugins/omppm-override-phpmail-mailpoet/omppm-override-phpmail-mailpoet.php"
+    },
+    {
+      "step": "wp-cli",
+      "command": "wp eval-file /wordpress/wp-content/plugins/omppm-override-phpmail-mailpoet/tests/playground/assert-alias.php"
+    }
+  ]
+}

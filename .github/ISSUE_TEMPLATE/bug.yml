@@ -1,0 +1,44 @@
+name: Bug report
+description: Report a reproducible mail-routing, compatibility, or admin defect.
+title: '[Bug] '
+labels:
+  - bug
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What is wrong, and what should happen instead?
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: WordPress, PHP, plugin version, MailPoet version, MailPoet sending method setting, SMTP plugin and version (e.g. WP Mail SMTP, FluentSMTP), and hosting mailer specifics.
+    validations:
+      required: true
+  - type: textarea
+    id: email-context
+    attributes:
+      label: Email type and sending context
+      description: Which email failed (newsletter, post notification, test email, WooCommerce automatic, transactional, WordPress system mail such as password reset) and how it was triggered.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      description: Exact steps, expected delivery path (which mailer should send), and actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: SMTP plugin log entries, debug.log excerpts (mask recipient addresses), screenshots, mail headers. Never post credentials.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Concrete outcomes that prove the issue is fixed.

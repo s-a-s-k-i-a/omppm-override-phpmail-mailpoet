@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<ruleset name="SMTP Mail Control for MailPoet">
+  <description>PHP compatibility baseline. Full WPCS adoption is tracked in GitHub issue #2.</description>
+
+  <file>omppm-override-phpmail-mailpoet.php</file>
+  <file>includes</file>
+  <file>tests/unit</file>
+
+  <exclude-pattern>vendor/*</exclude-pattern>
+
+  <arg name="basepath" value="."/>
+  <arg name="colors"/>
+  <arg value="sp"/>
+  <arg name="extensions" value="php"/>
+
+  <!--
+    The published plugin still declares "Requires PHP: 8.0", but the enum
+    declaration in the main file is PHP 8.1+ syntax, so 8.1 is the factual
+    minimum this code base parses on. Issue #1 tracks aligning the declared
+    requirement; adjust testVersion together with that fix.
+  -->
+  <rule ref="PHPCompatibilityWP">
+    <properties>
+      <property name="testVersion" value="8.1-"/>
+    </properties>
+  </rule>
+
+  <config name="minimum_supported_wp_version" value="6.5"/>
+  <config name="testVersion" value="8.1-"/>
+</ruleset>
