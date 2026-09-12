@@ -1,6 +1,6 @@
 # Issue #8: isolated native SMTP smoke — 2026-09-12
 
-This is a partial integration receipt, not a release or full MailPoet compatibility claim.
+The completion matrix below records the final native queue, fault-recovery and browser tests. Earlier sections preserve the initial reproduction and partial-fix history; their open items are superseded by the completion matrix. Release and CI receipts are recorded separately in issue #8.
 
 ## Tested source and runtime
 
