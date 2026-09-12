@@ -17,5 +17,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      # ubuntu-latest (24.04) no longer ships a Subversion client.
+      - name: Install Subversion
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq subversion
+
       - name: Compare stable release with SVN
         run: ./scripts/verify-svn-sync.sh
