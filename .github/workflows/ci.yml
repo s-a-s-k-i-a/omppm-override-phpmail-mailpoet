@@ -72,6 +72,9 @@ jobs:
       - name: Test release content guards
         run: ./scripts/test-release-contents.sh
 
+      - name: Test SVN and public release verification guards
+        run: ./scripts/test-svn-verification.sh
+
       - name: Build distribution
         run: ./scripts/build-release.sh
 
