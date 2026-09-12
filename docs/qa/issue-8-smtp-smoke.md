@@ -43,3 +43,16 @@ The sequential direct mailer calls are not a newsletter queue run. Their later s
 - All repository test gates, exact-commit PR CI and post-merge Main CI; this document does not substitute for those receipts.
 
 The temporary SMTP and MySQL processes were stopped after testing; the isolated scratch files remain local for diagnosis. No existing LocalWP site or service was changed.
+
+## Repeat after integration of Main 1.2.5
+
+On the same date, Main advanced to 1.2.5 through PR #7. The fix branch integrated that update with merge commit `2d5f0aa49bf9628c6390a2c35d12fb0c873236fa`. The final plugin file SHA-256 is `e7b9ea1972c140f1f71d87ba712bfd338b3118b56f11ed2b5a9a1d248c66fa43`.
+
+The scratch runtime was restarted with the same isolation, and the final plugin and admin module were copied into it. Runtime readback confirmed OMPPM **1.2.5**, MailPoet **5.38.0**, WP Mail SMTP **4.9.0**, WordPress **7.1**, PHP **8.5.8**, and the active override alias. The following checks were repeated successfully:
+
+- Real SMTP sequence: accepted → 550 → accepted → 450 → accepted returned `true,false,true,false,true`; both failures retained string recipients and formatted safely.
+- Real DI-created `SendingErrorHandler` with a fresh real 550 result produced the expected retry exception, `retry_attempt=1`, a set retry time and the correctly formatted error.
+- Real WordPress password reset returned true and was captured locally.
+- `tests/playground/assert-error-contract.php` passed against the real installed MailPoet classes.
+
+The original limitations above remain unchanged. The test processes were again stopped after this repeat; the SMTP listener was closed and the private MySQL socket removed.
