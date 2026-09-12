@@ -5,7 +5,7 @@ namespace OMPPM;
  * Plugin Name:       SMTP Mail Control for MailPoet
  * Plugin URI:        https://saskialund.de/
  * Description:       The missing link between MailPoet and your SMTP plugin – for reliable email delivery!
- * Version:           1.2.5
+ * Version:           1.2.6
  * Requires at least: 6.5
  * Requires PHP:      8.1
  * Author:            Saskia Teichmann

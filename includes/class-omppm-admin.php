@@ -37,7 +37,7 @@ class OMPPM_Admin {
     /**
      * Plugin version constant
      */
-    private const PLUGIN_VERSION = '1.2.5';
+    private const PLUGIN_VERSION = '1.2.6';
     
     /**
      * Constructor
