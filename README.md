@@ -3,7 +3,8 @@
 **Donate link:** https://www.saskialund.de/donate/
 **Tags:** mailpoet, smtp, wp_mail, gmail-api, phpmailer
 **Tested up to:** 6.9
-**Stable tag:** 1.2.4
+**Requires PHP:** 8.1
+**Stable tag:** 1.2.5
 **License:** GPLv2 or later
 **License URI:** https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,10 +36,10 @@ By default, MailPoet sends emails via **PHP Mail**, its **premium MailPoet Sendi
 
 ## 🔧 PHP Compatibility
 
-This plugin is optimized for modern PHP versions with intelligent fallbacks:
+This plugin is built for modern PHP versions:
 
 ### **Minimum Requirements:**
-- **PHP 8.0+** (required)
+- **PHP 8.1+** (required)
 - **WordPress 6.5+** (required)
 
 ### **Recommended:**
@@ -48,13 +49,11 @@ This plugin is optimized for modern PHP versions with intelligent fallbacks:
 
 | PHP Version | Constructor Property Promotion | Match Expressions | Named Arguments | First-class Callables | Enums | Readonly Properties | Typed Constants |
 |-------------|-------------------------------|-------------------|-----------------|----------------------|-------|-------------------|-----------------|
-| **8.0**     | ✅ Yes                        | ✅ Yes            | ✅ Yes          | ❌ Fallback          | ❌ Fallback | ❌ Fallback      | ❌ Fallback     |
 | **8.1**     | ✅ Yes                        | ✅ Yes            | ✅ Yes          | ✅ Yes               | ✅ Yes | ✅ Yes           | ❌ Fallback     |
 | **8.2**     | ✅ Yes                        | ✅ Yes            | ✅ Yes          | ✅ Yes               | ✅ Yes | ✅ Yes           | ❌ Fallback     |
 | **8.3**     | ✅ Yes                        | ✅ Yes            | ✅ Yes          | ✅ Yes               | ✅ Yes | ✅ Yes           | ✅ Yes          |
 
 ### **Performance Benefits:**
-- **PHP 8.0**: 20% faster than PHP 7.4
 - **PHP 8.1**: 25% faster than PHP 7.4
 - **PHP 8.2**: 30% faster than PHP 7.4
 - **PHP 8.3**: 35% faster than PHP 7.4
@@ -97,6 +96,13 @@ It has been tested with MailPoet 5.x. MailPoet may change internal classes or ar
 No. But internally, it uses a "class alias" hack to replace MailPoet's `PHPMail` class on the fly, which can be update-sensitive. If you see errors or your newsletter fails after a MailPoet update, deactivate and re-check plugin compatibility.
 
 ## Changelog ##
+
+**1.2.5**
+* Release date: September 12th 2026
+* Minimum PHP requirement corrected to 8.1: the enum-based email type support introduced in 1.2.0 is PHP 8.1+ syntax, so PHP 8.0 sites could never load versions 1.2.0–1.2.4 (parse error at load time)
+* Removed the resulting dead PHP 8.0 fallback code paths
+* The GPL license file now ships with the plugin
+* Development now happens in this public GitHub repository (issues and contributions welcome)
 
 **1.2.4**
 * Release date: January 21st 2026

@@ -37,29 +37,18 @@ class OMPPM_Admin {
     /**
      * Plugin version constant
      */
-    private const PLUGIN_VERSION = '1.2.4';
+    private const PLUGIN_VERSION = '1.2.5';
     
     /**
      * Constructor
      */
     public function __construct() {
-        // Use first-class callable syntax for PHP 8.1+, fallback for older versions
-        if (version_compare(PHP_VERSION, '8.1.0', '>=')) {
-            add_action('admin_menu', $this->add_admin_menu(...));
-            add_action('admin_init', $this->init_settings(...));
-            add_action('admin_enqueue_scripts', $this->enqueue_admin_scripts(...));
-            add_action('wp_ajax_omppm_toggle_debug', $this->ajax_toggle_debug(...));
-            add_action('wp_ajax_omppm_clear_logs', $this->ajax_clear_logs(...));
-            add_action('wp_ajax_omppm_send_test_email', $this->ajax_send_test_email(...));
-        } else {
-            // Fallback for PHP 8.0
-            add_action('admin_menu', [$this, 'add_admin_menu']);
-            add_action('admin_init', [$this, 'init_settings']);
-            add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_scripts']);
-            add_action('wp_ajax_omppm_toggle_debug', [$this, 'ajax_toggle_debug']);
-            add_action('wp_ajax_omppm_clear_logs', [$this, 'ajax_clear_logs']);
-            add_action('wp_ajax_omppm_send_test_email', [$this, 'ajax_send_test_email']);
-        }
+        add_action('admin_menu', $this->add_admin_menu(...));
+        add_action('admin_init', $this->init_settings(...));
+        add_action('admin_enqueue_scripts', $this->enqueue_admin_scripts(...));
+        add_action('wp_ajax_omppm_toggle_debug', $this->ajax_toggle_debug(...));
+        add_action('wp_ajax_omppm_clear_logs', $this->ajax_clear_logs(...));
+        add_action('wp_ajax_omppm_send_test_email', $this->ajax_send_test_email(...));
     }
     
     /**

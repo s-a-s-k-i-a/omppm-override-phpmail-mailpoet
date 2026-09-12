@@ -2,6 +2,12 @@
 
 The user-facing changelog lives in `readme.txt` (WordPress.org format); this file condenses it for GitHub readers. Entries before 2026-09-12 predate this repository and were imported from the WordPress.org SVN history.
 
+## 1.2.5 — 2026-09-12
+
+- Minimum PHP requirement corrected to 8.1 (issue #1): the enum introduced in 1.2.0 is PHP 8.1+ syntax, so 1.2.0–1.2.4 could never load on PHP 8.0 (parse error). Dead 8.0 fallback branches removed.
+- The GPL license file now ships with the plugin.
+- First release built and deployed through the GitHub release pipeline.
+
 ## 1.2.4 — 2026-01-21
 
 - Tested up to WordPress 6.9.
