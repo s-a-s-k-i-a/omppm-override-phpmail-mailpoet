@@ -8,7 +8,7 @@ The test pyramid has four layers:
    mapping, wp_mail failure handling, and the recursion guard.
 2. `composer lint` checks PHP 8.1+ compatibility (PHPCompatibilityWP). Full
    WPCS adoption is issue #2.
-3. `./scripts/test-playground.sh` boots a disposable WordPress with the
+3. `./scripts/test-playground-controls.sh` boots a disposable WordPress with the
    current WordPress.org MailPoet build, activates this plugin, and asserts
    that `\MailPoet\Mailer\Methods\PHPMail` resolves to
    `OMPPM\MyPHPMailOverride`.
@@ -17,7 +17,8 @@ The test pyramid has four layers:
    - MailPoet sending method set to *Host / Web Server (PHP mail)*.
    - Tools → SMTP Mail Control: MailPoet active, class alias active.
    - MailPoet **test email** arrives through the configured SMTP plugin
-     (verify in the SMTP plugin's log, not just the inbox).
+     (verify SMTP acceptance in the test catcher or provider; some free
+     SMTP plugins do not offer delivery logs).
    - One real **newsletter** to a test list arrives through SMTP.
    - A WordPress **system mail** (password reset) completes without timeout
      while MailPoet is active — this exercises the recursion guard.
@@ -54,3 +55,9 @@ continues only at its original level (no output when it was disabled). Regressio
 coverage includes stale errors on reused objects, nested sends, changed/multiple
 recipients, callback preservation, and hook cleanup. An SMTP acceptance followed
 by a later DSN is outside this synchronous transport contract.
+Playground uses pinned Node 22.16.0 and CLI 3.1.46 through npm. Its `runPHP`
+step must write a fresh completion receipt from inside WordPress; exit 0
+alone never passes. The controls script also forces a deliberate PHP
+assertion failure and requires both a nonzero exit and its exact error marker.
+This checks the alias and native error contract, not newsletter or database compatibility.
+The native MySQL E2E job exercises the real MailPoet worker and SMTP failures.

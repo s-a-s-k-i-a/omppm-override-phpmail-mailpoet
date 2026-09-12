@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_call:
   pull_request:
   push:
     branches:
@@ -56,19 +57,14 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
-          node-version: '22'
+          node-version: '22.16.0'
 
       - name: Verify class alias inside WordPress with MailPoet
-        run: ./scripts/test-playground.sh
+        run: ./scripts/test-playground-controls.sh
 
   plugin-check:
     name: WordPress Plugin Check
     runs-on: ubuntu-latest
-    # KNOWN RED on the imported 1.2.4 code: escaping (#3), i18n (#2),
-    # debug.log file operations (#4), and "Tested up to" (#5). Make this job
-    # blocking again (remove continue-on-error) once those ship in the next
-    # release — the results and artifact stay visible either way.
-    continue-on-error: true
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -87,3 +83,34 @@ jobs:
         with:
           build-dir: plugin-check-build/omppm-override-phpmail-mailpoet
           wp-version: latest
+
+  e2e:
+    name: MailPoet SMTP E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: disposable-test-only
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -pdisposable-test-only"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Set up PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240
+        with:
+          php-version: '8.3'
+          extensions: mysqli, mbstring, intl, curl, zip
+          coverage: none
+          tools: wp-cli
+      - name: Exercise native MailPoet and SMTP delivery
+        env:
+          OMPPM_E2E_DB_HOST: 127.0.0.1:3306
+          OMPPM_E2E_DB_USER: root
+          OMPPM_E2E_DB_PASS: disposable-test-only
+        run: ./scripts/test-e2e.sh

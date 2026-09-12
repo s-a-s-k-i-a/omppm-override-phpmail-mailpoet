@@ -7,3 +7,7 @@ Install tooling with `composer install`. Production code targets PHP 8.1+ (decla
 Use one issue per independently reviewable defect or feature. Compatibility reports should identify the exact MailPoet and SMTP-plugin versions, then reduce the behavior to the routing contract in `tests/unit/` whenever possible. A real MailPoet activation and send smoke is still required before claiming compatibility with a specific MailPoet release.
 
 The pragmatic PHPCS baseline covers PHP compatibility only; full WordPress Coding Standards adoption is tracked in issue #2.
+
+CI is a reusable workflow: pull requests, `main`, and numeric release tags run
+one shared set of required checks. WordPress Plugin Check failures block the
+pipeline. Its historical `continue-on-error` exception was removed in #10.

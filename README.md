@@ -95,6 +95,10 @@ It has been tested with MailPoet 5.x. MailPoet may change internal classes or ar
 ### Does this plugin require code changes in MailPoet? ###
 No. But internally, it uses a "class alias" hack to replace MailPoet's `PHPMail` class on the fly, which can be update-sensitive. If you see errors or your newsletter fails after a MailPoet update, deactivate and re-check plugin compatibility.
 
+### What does debug mode store? ###
+
+When debug is enabled, SMTP Mail Control stores only the latest 100 UTC timestamps and fixed diagnostic event codes in the WordPress database. Tools → SMTP Mail Control displays and clears only these plugin events. Recipient addresses, subjects, message bodies and SMTP error text are not stored. No new entries are written to the shared debug.log file. Older debug.log files are not modified; remove historical personal data through your normal site-maintenance process. Disable debug after troubleshooting. Other mail plugins have their own logging and retention settings.
+
 ## Changelog ##
 
 **1.2.5**
