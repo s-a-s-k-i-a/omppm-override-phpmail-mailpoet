@@ -32,3 +32,11 @@ can bypass that environment rule; self-review is permitted and deployment
 branches are unrestricted. At audit time `main` had no branch protection.
 These are control-plane settings, not guarantees enforced by these files;
 read them back before relying on them and record any subsequent changes.
+
+`verify-svn-sync.sh <version>` compares both SVN `trunk` and the numeric tag,
+then verifies the public WordPress.org API version and download URL and
+compares the extracted public ZIP byte-for-byte with the local build. Public
+API/CDN propagation is retried for at most 300 seconds; SVN drift fails
+immediately. `OMPPM_VERIFY_WAIT_SECONDS` may shorten this window (1–300).
+`test-svn-verification.sh` uses synthetic network-command fixtures to prove
+that matching contents pass and trunk, public-version and ZIP drift fail.
