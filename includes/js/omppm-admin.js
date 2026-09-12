@@ -258,10 +258,11 @@
             const $notification = $(`
                 <div class="omppm-notification ${type}" id="${notificationId}">
                     <button class="omppm-notification-close">&times;</button>
-                    <div class="omppm-notification-content">${message}</div>
+                    <div class="omppm-notification-content"></div>
                 </div>
             `);
             
+            $notification.find('.omppm-notification-content').text(message);
             $container.append($notification);
             
             // Auto-remove after 5 seconds
