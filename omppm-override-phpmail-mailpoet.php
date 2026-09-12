@@ -22,17 +22,18 @@ if (!defined('ABSPATH')) {
 }
 
 require_once __DIR__ . '/includes/class-omppm-smtp-error-capture.php';
+require_once __DIR__ . '/includes/class-omppm-debug.php';
 
 // Define OMPPM debug constant
 if (!defined('OMPPM_DEBUG')) {
-    $debug_enabled = get_option('omppm_debug_enabled', false);
-    define('OMPPM_DEBUG', $debug_enabled);
+    $omppm_debug_enabled = get_option('omppm_debug_enabled', false);
+    define('OMPPM_DEBUG', $omppm_debug_enabled);
 }
 
 // Only load if MailPoet is active
 if (!class_exists('MailPoet\Mailer\Mailer')) {
     if (OMPPM_DEBUG) {
-        error_log('OMPPM: MailPoet is not active, plugin disabled');
+        Debug::log('mailpoet_missing');
     }
     return;
 }
@@ -80,7 +81,7 @@ add_action('plugins_loaded', __NAMESPACE__ . '\\omppm_setup_alias', 1);
  * Debug: Log plugin loading
  */
 if (OMPPM_DEBUG) {
-    error_log('OMPPM: Plugin file loaded');
+    Debug::log('alias_setup');
 }
 
 /**
@@ -90,13 +91,13 @@ if (OMPPM_DEBUG) {
  */
 function omppm_setup_alias() {
     if (OMPPM_DEBUG) {
-        error_log('OMPPM: omppm_setup_alias() called');
+        Debug::log('alias_setup');
     }
     
     // Check if PHPMail class already exists (meaning our alias worked)
     if (class_exists('\\MailPoet\\Mailer\\Methods\\PHPMail', false)) {
         if (OMPPM_DEBUG) {
-            error_log('OMPPM: PHPMail class already exists (our alias is active)');
+            Debug::log('alias_active');
         }
         return;
     }
@@ -104,7 +105,7 @@ function omppm_setup_alias() {
     // Create the alias - simple and direct like version 1.0.4
     if (!class_exists('\\MailPoet\\Mailer\\Methods\\PHPMail', false)) {
         if (OMPPM_DEBUG) {
-            error_log('OMPPM: Creating class alias for PHPMail');
+            Debug::log('alias_setup');
         }
         
         class_alias(
@@ -113,7 +114,7 @@ function omppm_setup_alias() {
         );
         
         if (OMPPM_DEBUG) {
-            error_log('OMPPM: Class alias created successfully');
+            Debug::log('alias_active');
         }
     }
 }
@@ -141,7 +142,7 @@ class MyPHPMailOverride extends BasePHPMailerMethod {
         $urlUtils
     ) {
         if (OMPPM_DEBUG) {
-            error_log('OMPPM: MyPHPMailOverride constructor called');
+            Debug::log('constructor');
         }
         
         // Initialize supported email types
@@ -170,7 +171,7 @@ class MyPHPMailOverride extends BasePHPMailerMethod {
         // Direct match with MailPoet email types
         if (in_array($email_type, $mailpoetTypes, true)) {
             if (OMPPM_DEBUG) {
-                error_log("OMPPM: MailPoet email type matched: " . $email_type);
+                Debug::log('type_supported');
             }
             return true;
         }
@@ -178,7 +179,7 @@ class MyPHPMailOverride extends BasePHPMailerMethod {
         // Direct match with our supported email types
         if (in_array($email_type, $this->supported_email_types, true)) {
             if (OMPPM_DEBUG) {
-                error_log("OMPPM: Supported email type matched: " . $email_type);
+                Debug::log('type_supported');
             }
             return true;
         }
@@ -186,7 +187,7 @@ class MyPHPMailOverride extends BasePHPMailerMethod {
         // Pattern matching for automatic emails (automatic_{group}_{event})
         if (strpos($email_type, 'automatic_') === 0) {
             if (OMPPM_DEBUG) {
-                error_log("OMPPM: Automatic email pattern matched: " . $email_type);
+                Debug::log('type_pattern');
             }
             return true;
         }
@@ -194,7 +195,7 @@ class MyPHPMailOverride extends BasePHPMailerMethod {
         // Pattern matching for WooCommerce automatic emails
         if (strpos($email_type, 'automatic_woocommerce_') === 0) {
             if (OMPPM_DEBUG) {
-                error_log("OMPPM: WooCommerce automatic email pattern matched: " . $email_type);
+                Debug::log('type_pattern');
             }
             return true;
         }
@@ -202,13 +203,13 @@ class MyPHPMailOverride extends BasePHPMailerMethod {
         // Pattern matching for other automatic email patterns
         if (preg_match('/^automatic_[a-zA-Z0-9_]+_[a-zA-Z0-9_]+$/', $email_type)) {
             if (OMPPM_DEBUG) {
-                error_log("OMPPM: Generic automatic email pattern matched: " . $email_type);
+                Debug::log('type_pattern');
             }
             return true;
         }
         
         if (OMPPM_DEBUG) {
-            error_log("OMPPM: Email type not supported: " . $email_type);
+            Debug::log('type_unsupported');
         }
         
         return false;
@@ -231,7 +232,7 @@ class MyPHPMailOverride extends BasePHPMailerMethod {
         // Check if NewsletterEntity class exists
         if (!class_exists('MailPoet\Entities\NewsletterEntity')) {
             if (OMPPM_DEBUG) {
-                error_log("OMPPM: NewsletterEntity class not found");
+                Debug::log('reflection_exception');
             }
             return $mailpoetTypes;
         }
@@ -247,12 +248,12 @@ class MyPHPMailOverride extends BasePHPMailerMethod {
             }
             
             if (OMPPM_DEBUG) {
-                error_log("OMPPM: Found " . count($mailpoetTypes) . " MailPoet email types: " . implode(', ', $mailpoetTypes));
+                Debug::log('email_types_discovered');
             }
             
         } catch (ReflectionException $e) {
             if (OMPPM_DEBUG) {
-                error_log("OMPPM: Reflection error: " . $e->getMessage());
+                Debug::log('reflection_exception');
             }
         }
         
@@ -262,13 +263,13 @@ class MyPHPMailOverride extends BasePHPMailerMethod {
     public function send($newsletter, $subscriber, $extraParams = []): array {
         if (OMPPM_DEBUG) {
             $email_type = $extraParams["meta"]["email_type"] ?? "unknown";
-            error_log("OMPPM: send() called - Email type: " . $email_type);
+            Debug::log('send_start');
         }
         
         // RECURSION PROTECTION: Prevent infinite loops
         if (self::$is_sending) {
             if (OMPPM_DEBUG) {
-                error_log("OMPPM: RECURSION DETECTED! Using parent method to break the loop.");
+                Debug::log('recursion_fallback');
             }
             return parent::send($newsletter, $subscriber, $extraParams);
         }
@@ -291,18 +292,18 @@ class MyPHPMailOverride extends BasePHPMailerMethod {
             }
             
             if (OMPPM_DEBUG) {
-                error_log("OMPPM: is_mailpoet_mail: " . ($is_mailpoet_mail ? "TRUE" : "FALSE"));
+                Debug::log('send_start');
             }
             
             if (!$is_mailpoet_mail) {
                 if (OMPPM_DEBUG) {
-                    error_log("OMPPM: Using original MailPoet method");
+                    Debug::log('type_unsupported');
                 }
                 return parent::send($newsletter, $subscriber, $extraParams);
             }
             
             if (OMPPM_DEBUG) {
-                error_log("OMPPM: Processing via wp_mail()");
+                Debug::log('wp_mail_start');
             }
             
             // Set recursion flag before calling wp_mail()
@@ -317,7 +318,7 @@ class MyPHPMailOverride extends BasePHPMailerMethod {
             $body = $mailer->Body;
             
             if (OMPPM_DEBUG) {
-                error_log("OMPPM: Sending via wp_mail() - To: " . $to . ", Subject: " . $subject);
+                Debug::log('wp_mail_start');
             }
             
             $headers = [];
@@ -356,12 +357,12 @@ class MyPHPMailOverride extends BasePHPMailerMethod {
             $result = wp_mail($to, $subject, $body, $headers);
             
             if (OMPPM_DEBUG) {
-                error_log("OMPPM: wp_mail() result: " . ($result ? "SUCCESS" : "FAILED"));
+                Debug::log($result ? 'wp_mail_success' : 'wp_mail_failure');
             }
             
         } catch (\Exception $e) {
             if (OMPPM_DEBUG) {
-                error_log("OMPPM: Exception occurred: " . $e->getMessage());
+                Debug::log('send_exception');
             }
             // Reset recursion flag on exception
             self::$is_sending = false;
