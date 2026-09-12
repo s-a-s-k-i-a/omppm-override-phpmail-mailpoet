@@ -1,10 +1,10 @@
 === SMTP Mail Control for MailPoet ===
 Contributors: Jyria
-Donate link: https://www.saskialund.de/donate/
+Donate link: https://isla-stud.io/donate/
 Tags: mailpoet, smtp, wp_mail, gmail-api, phpmailer
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.2.5
+Stable tag: 1.2.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -70,6 +70,11 @@ No. But internally, it uses a "class alias" hack to replace MailPoet's `PHPMail`
 When debug is enabled, SMTP Mail Control stores only the latest 100 UTC timestamps and fixed diagnostic event codes in the WordPress database. Tools → SMTP Mail Control displays and clears only these plugin events. Recipient addresses, subjects, message bodies and SMTP error text are not stored. No new entries are written to the shared debug.log file. Older debug.log files are not modified; remove historical personal data through your normal site-maintenance process. Disable debug after troubleshooting. Other mail plugins have their own logging and retention settings.
 
 == Changelog ==
+
+= 1.2.6 =
+
+Release date: September 12th 2026
+- Update the donation links to the current Isla Studio donation page.
 
 = 1.2.5 =
 
