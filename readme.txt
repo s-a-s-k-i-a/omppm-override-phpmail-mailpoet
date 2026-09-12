@@ -1,0 +1,330 @@
+=== SMTP Mail Control for MailPoet ===
+Contributors: Jyria
+Donate link: https://www.saskialund.de/donate/
+Tags: mailpoet, smtp, wp_mail, gmail-api, phpmailer
+Tested up to: 6.9
+Stable tag: 1.2.4
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+
+The missing link between MailPoet and your SMTP plugin – for reliable email delivery!
+
+== Description ==
+
+By default, MailPoet sends emails via **PHP Mail**, its **premium MailPoet Sending Service**, or services like **Amazon SES or SendGrid**. But there's a catch: **Some SMTP providers (like Gmail) aren't supported**, and **email logging isn't possible**.  
+
+➡ **This plugin fixes that.** It ensures all MailPoet newsletters are sent via **your chosen SMTP plugin**, so your WordPress email settings apply to newsletters, too – without extra setup or extra costs.  
+
+## 🛠 Works with popular SMTP plugins like:  
+✅ **WP Mail SMTP** (by WPForms – the most widely used SMTP plugin)  
+✅ **FluentSMTP** (lightweight, free, GDPR-friendly)  
+✅ **Post SMTP** (supports OAuth for Gmail, Outlook, etc.)  
+✅ **Easy WP SMTP** (simple & reliable)  
+✅ **MailerSend, Brevo (formerly Sendinblue), and more**  
+
+## 🎯 Why use this plugin?  
+✔ **Ensures MailPoet emails follow your SMTP settings**  
+✔ **Works with Gmail & other SMTP providers MailPoet doesn't support**  
+✔ **Enables email logging via your SMTP plugin**  
+
+## ⚠ Important notes:  
+- Major MailPoet updates may require adjustments.  
+- Some advanced MailPoet features (like bounce handling) may behave differently.  
+
+✅ **Test your setup with MailPoet test emails and real newsletters to ensure everything runs smoothly!**
+
+== Installation ==
+
+1. Download or clone this plugin into your `/wp-content/plugins/` directory.  
+2. Make sure the folder is named something like `omppm-override-phpmail-mailpoet`.
+3. Go to **Plugins** in your WordPress admin area and activate **Override PHP Mail for Mailpoet (via wp_mail)**.
+4. In **MailPoet > Settings**, choose "Server (Standard)" or "PHP mail" as your sending method (so it normally uses `PHPMail`).
+5. Configure your SMTP method in **WP Mail SMTP** (or your preferred SMTP plugin).  
+   - If you're using Gmail API or another specialized flow, ensure it's properly set up in WP Mail SMTP.
+6. Send a test newsletter (or use the MailPoet test mail) and verify via WP Mail SMTP logs or email headers that the mail goes through your desired SMTP provider.
+
+== Frequently Asked Questions ==
+
+= Does this plugin replace MailPoet's default sending method completely? =  
+Yes. For all newsletters and test emails that would normally use "PHPMail," it redirects to `wp_mail()`. However, if you are using MailPoet's own "MailPoet Sending Service" or "SendGrid," those remain unaffected.
+
+= Will this plugin work with MailPoet 4, 5, or future versions? =  
+It has been tested with MailPoet 5.x. MailPoet may change internal classes or architecture in future updates, which could break this override approach. We recommend testing on a staging site whenever you update MailPoet.
+
+= What if my emails still seem to go out via `mail()`? =  
+- Double-check that you have the correct sending method set in MailPoet ("Server" / "PHP mail"), not an external SMTP inside MailPoet's own configuration.  
+- Verify that WP Mail SMTP (or any other SMTP plugin) is active and configured.  
+- Check if the MailPoet test emails differ from real newsletter sends. Sometimes the test mail can take a different route.
+
+= Does this plugin require code changes in MailPoet? =  
+No. But internally, it uses a "class alias" hack to replace MailPoet's `PHPMail` class on the fly, which can be update-sensitive. If you see errors or your newsletter fails after a MailPoet update, deactivate and re-check plugin compatibility.
+
+== Screenshots ==
+
+1. **WP Mail SMTP / Gmail**: A typical SMTP settings page where you configure your mailer.  
+2. **MailPoet Settings**: "Server (Standard)" selected as sending method, with this plugin ensuring it routes via `wp_mail()`.
+
+== Changelog ==
+
+= 1.2.4 =
+
+Release date: January 21st 2026
+
+- Tested up to WP 6.9
+
+= 1.2.3 =
+
+Release date: January 21st 2026
+
+- **BUGFIX: Kritischer Fix für Endlosschleifen beim E-Mail-Versand**
+- **BUGFIX: Rekursionsschutz verhindert Timeout-Fehler bei WordPress-System-E-Mails**
+- Problem behoben: Passwort-Zurücksetzen und andere WordPress-E-Mails führten zu "Maximum execution time exceeded"-Fehler
+- Neues Sicherheitsfeature: Automatische Erkennung und Verhinderung von rekursiven wp_mail()-Aufrufen
+- Verbesserte Stabilität bei Verwendung mit WP Mail SMTP und anderen SMTP-Plugins
+- Verhindert Konflikte wenn MailPoet versucht, WordPress-System-E-Mails zu verarbeiten
+
+= 1.2.2 =
+
+Release date: August 21st 2025
+
+- **NEU: Dynamische MailPoet E-Mail-Typ-Erkennung mit Reflection**
+- **NEU: Automatische Unterstützung für alle offiziellen MailPoet E-Mail-Typen**
+- **NEU: Zukunftssichere E-Mail-Typ-Validierung**
+- **NEU: Reflection-basierte E-Mail-Typ-Entdeckung**
+- **NEU: Gecachte E-Mail-Typ-Erkennung für Performance**
+- **NEU: Erweitertes Admin-Interface mit dynamischer E-Mail-Typ-Anzahl**
+- **NEU: Automatische Updates wenn MailPoet neue E-Mail-Typen hinzufügt**
+- **NEU: Unterstützung für alle MailPoet E-Mail-Typen:**
+  * automation, automation_notification, automation_transactional
+  * standard, notification, notification_history
+  * re_engagement, wc_transactional, confirmation_email
+  * automatic, welcome (Legacy-Support)
+- **NEU: Intelligentes Fallback-System für E-Mail-Typ-Erkennung**
+- **NEU: Verbessertes Debugging für E-Mail-Typ-Matching**
+- **NEU: Performance-optimierte Reflection mit Caching**
+- Verbesserte Kompatibilität mit MailPoets neuestem E-Mail-Typ-System
+- Erweiterte Unterstützung für WooCommerce transaktionale E-Mails
+- Bessere Fehlerbehandlung und Logging für E-Mail-Typ-Erkennung
+- Zukunftssichere Architektur die sich automatisch an MailPoet-Updates anpasst
+
+= 1.2.1 =
+
+Release date: August 20th 2025
+
+- **NEU: Erweiterte E-Mail-Typ-Unterstützung mit Pattern-Matching**
+- **NEU: Unterstützung für Preview-E-Mails**
+- **NEU: Unterstützung für E-Mail-Statistik-Benachrichtigungen**
+- **NEU: Unterstützung für neue Abonnenten-Benachrichtigungen**
+- **NEU: Intelligentes Pattern-Matching für automatische E-Mails**
+- **NEU: WooCommerce automatische E-Mail-Unterstützung (automatic_woocommerce_*)**
+- **NEU: Generische automatische E-Mail-Pattern-Unterstützung (automatic_*_*)**
+- **NEU: Erweiterte E-Mail-Typ-Validierung mit Regex-Patterns**
+- **NEU: Verbessertes Debugging für E-Mail-Typ-Matching**
+- **NEU: Admin-Interface zeigt Anzahl unterstützter E-Mail-Typen**
+- **NEU: Zukunftssichere E-Mail-Typ-Erkennung**
+- Verbesserte Kompatibilität mit MailPoets neuestem automatischen E-Mail-System
+- Erweiterte Unterstützung für komplexe E-Mail-Typ-Patterns
+- Bessere Fehlerbehandlung und Logging für E-Mail-Typ-Erkennung
+
+= 1.2.0 =
+
+Release date: August 19th 2025
+
+- **NEU: Vollständige PHP 8.3 Kompatibilität mit intelligenten Fallbacks**
+- **NEU: Zukunftssichere Architektur für kommende PHP-Versionen**
+- Verbesserte Stabilität und Performance über alle PHP 8.x Versionen
+- Optimierte Code-Struktur mit modernen PHP-Best-Practices
+- Erweiterte Kompatibilität mit WordPress 6.5+ und MailPoet 5.x
+
+= 1.1.0 =
+
+Release date: August 11th 2025
+
+- Normalization of translations: en_US is now default locale as per WordPress Codex
+
+= 1.0.15 =
+
+Release date: August 8th 2025
+
+- **NEU: Vollständig überarbeitetes Admin-Dashboard mit moderner Benutzeroberfläche**
+- **NEU: Interaktive Debug-Funktionen mit Echtzeit-Log-Anzeige**
+- **NEU: Erweiterte Test-E-Mail-Funktionalität für MailPoet und Standard-SMTP**
+- **NEU: Professionelle Benutzeroberfläche mit modernem Design und verbesserter UX**
+- **NEU: Umfassende Debugging-Tools für Entwickler und Administratoren**
+- **NEU: Verbesserte Fehlerbehandlung und Benutzer-Feedback-System**
+- **NEU: Responsive Design für alle Geräte und Bildschirmgrößen**
+- **NEU: Erweiterte JavaScript-Funktionalität mit AJAX-Integration**
+- **NEU: CSS-Styling mit modernen UI-Komponenten und Animationen**
+- **NEU: Umfassende Admin-Klasse mit professioneller Codestruktur**
+- Verbesserte Stabilität und Performance
+- Optimierte Code-Struktur und Wartbarkeit
+
+= 1.0.14 =
+
+Release date: August 8th 2025
+
+- Fixed "Test-Email senden" button functionality
+- Added AJAX handler for test email sending
+- Improved error handling and user feedback
+- Added detailed test email with plugin information
+- Enhanced JavaScript error reporting for debugging
+
+= 1.0.13 =
+
+Release date: August 8th 2025
+
+- Added developer information card with professional presentation
+- Added direct links to GitHub repository for issues and contributions
+- Added contact information and company details
+- Enhanced admin interface with developer branding
+- Prepared for GitHub repository integration
+- Added comprehensive GitHub setup documentation
+
+= 1.0.12 =
+
+Release date: August 8th 2025
+
+- Added comprehensive setup instructions with step-by-step guidance
+- Added visual "How It Works" explanation with animated cards
+- Added troubleshooting section with common issues and solutions
+- Added interactive MailPoet test email button
+- Enhanced admin interface with modern, visually appealing design
+- Added SMTP configuration examples for popular providers
+- Improved user experience with clear setup workflow
+- Added visual indicators and badges for better guidance
+
+= 1.0.11 =
+
+Release date: August 8th 2025
+
+- Added modern, extensible admin interface under Tools > OMPPM Tools
+- Individualized debug constant (OMPPM_DEBUG) independent of WP_DEBUG
+- Interactive debug toggle with real-time status updates
+- Log management with clear and refresh functionality
+- Plugin status monitoring (MailPoet active, Class Alias status)
+- Quick action buttons for MailPoet and SMTP settings
+- Modern, responsive design with card-based layout
+- AJAX-powered interface with notifications
+- Object-oriented architecture for easy future expansion
+
+= 1.0.10 =
+
+Release date: August 8th 2025
+
+- Fixed fatal error: MailerMethod is an interface, not a class
+- Corrected base class to PHPMailerMethod (the actual class, not interface)
+- Restored compatibility with MailPoet 5.12.13 class hierarchy
+- Fixed inheritance issue that was preventing plugin from loading
+
+= 1.0.9 =
+
+Release date: August 8th 2025
+
+- Reverted to simple, working approach from version 1.0.4
+- Removed complex dynamic class detection and eval() usage
+- Restored direct class_alias() functionality that worked perfectly
+- Fixed compatibility with MailPoet 5.12.13 using correct class names
+- Simplified plugin architecture for better reliability
+- Removed unnecessary AJAX context checks and multiple hooks
+
+= 1.0.8 =
+
+Release date: August 8th 2025
+
+- Fixed AJAX context detection that was preventing plugin from loading in normal WordPress context
+- Removed overly restrictive AJAX checks that blocked plugin initialization
+- Added more WordPress hooks (muplugins_loaded, after_setup_theme) to catch MailPoet loading earlier
+- Improved class availability checking to work in all contexts
+- Enhanced compatibility with different WordPress loading scenarios
+
+= 1.0.7 =
+
+Release date: August 8th 2025
+
+- Added comprehensive debugging support for troubleshooting email delivery issues
+- Enhanced logging to help identify if emails are being processed via wp_mail() or original MailPoet methods
+- Improved compatibility with WP Mail Logging plugins
+- Added debug messages for better tracking of email processing flow
+- Reverted to working class_alias approach from version 1.0.4
+- Enhanced plugin initialization with plugins_loaded priority 1
+- Added detailed MailPoet class availability checking
+- Improved hook timing to ensure plugin activation
+- Fixed iframe/AJAX compatibility issues with dynamic class definition
+- Added AJAX context detection to prevent fatal errors
+- Fixed class alias creation to only occur when class is properly defined
+- Enhanced class availability checking for all required MailPoet dependencies
+- Added multiple hook attempts to catch MailPoet initialization at different points
+- Added MailPoet version detection for better debugging
+- Enhanced alias detection to prevent duplicate setup attempts
+- Added comprehensive MailPoet class availability checking
+- Enhanced debugging to show all available MailPoet classes
+- Added support for different MailPoet versions with dynamic class detection
+- Fixed compatibility with newer MailPoet class structures
+- Fixed compatibility with MailPoet 5.12.13 using correct class names
+- Analyzed actual MailPoet code to use proper class hierarchy
+
+= 1.0.7-beta =
+
+Release date: August 8th 2025
+
+- Improved compatibility with WPO365 | Microsoft 365 Graph Mailer and other SMTP plugins
+- Made email type validation more permissive for better backward compatibility
+- Fixed issues where some MailPoet emails were not being processed correctly
+- Enhanced support for emails without specific email_type metadata
+
+= 1.0.6 =
+
+Release date: August 6th 2025
+
+- Fixed memory exhaustion issue during class setup
+- Improved compatibility with AJAX and iframe contexts
+- Added checks for MailPoet class existence to prevent fatal errors
+- Improved loading priority to ensure compatibility with AJAX requests
+
+= 1.0.6-beta2 =
+
+Release date: August 1st 2025
+
+- Memory exhaustion fix: endless loop during class setup fixed
+
+= 1.0.6-beta =
+
+Release date: July 31st 2025
+
+- Refactured code to improve compatibility with AJAX and iframe contexts
+- Added checks for MailPoet class existence to prevent fatal errors
+- Improved loading priority to ensure compatibility with AJAX requests
+
+= 1.0.5 =
+
+Release date: July 31st 2025
+
+- Fixed AJAX/iframe compatibility issues by adding proper class existence checks
+- Improved loading priority to prevent fatal errors in iframe contexts
+- Added AJAX context detection to handle MailPoet class availability
+- Extended supported email types 
+
+= 1.0.4 =
+
+Release date: April 3rd 2025
+
+- Added support for additional MailPoet email types (post notifications, welcome emails, automatic emails)
+- Improved email type detection for better compatibility
+
+= 1.0.3 =
+
+Release date: February 19th 2025
+
+- Readme.txt updated.
+
+= 1.0.1
+
+Release date: January 23rd 2025
+
+- Polished readme.txt and main plguin file headers.
+
+= 1.0.0
+
+Release date: January 15th 2025
+
+- Erstveröffentlichung
