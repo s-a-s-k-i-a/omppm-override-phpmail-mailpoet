@@ -176,6 +176,7 @@ class MailRoutingTest extends TestCase {
 	}
 
 	public function test_transport_exception_preserves_original_subscriber_and_resets_guard(): void {
+		$before = $GLOBALS['omppm_test_actions'];
 		$GLOBALS['omppm_test_mail_result'] = static function () {
 			throw new \Exception( 'transport failed' );
 		};
@@ -183,6 +184,7 @@ class MailRoutingTest extends TestCase {
 		$result = $this->send_with_type( 'newsletter' );
 		$this->assertFalse( $result['response'] );
 		$this->assertSame( 'exception:transport failed', $result['error'] );
+		$this->assertSame( $before, $GLOBALS['omppm_test_actions'] );
 		$this->assertSame( array( 'subscriber@example.com' ), $this->method->errorMapper->subscribers );
 		$this->assertCount( 1, $GLOBALS['omppm_test_mail_log'] );
 

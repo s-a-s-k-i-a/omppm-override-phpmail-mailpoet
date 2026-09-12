@@ -35,3 +35,22 @@ error handler, and subsequent sends on the same instance. This catches the
 issue #8 array/string defect; it does not exercise SMTP or run a newsletter
 worker. Native hard errors still pause sending. The disposable SMTP and queue
 smokes above remain required before release.
+
+Issue #8 error mapping now observes each `wp_mail()` call with temporary
+`phpmailer_init`/`wp_mail_failed` hooks. For a single unchanged SMTP envelope
+recipient, a structured RCPT rejection with 5xx plus enhanced status 5.1.1,
+5.1.2, 5.1.3, 5.1.6 or 5.2.1 becomes MailPoet's subscriber-level (`LEVEL_SOFT`)
+sending error. This means the queue can record that failed send and continue;
+it does not change the subscriber's global status to bounced. Temporary errors,
+missing enhanced status, quota/policy errors, authentication, connection and DATA
+failures remain blocking errors. Alternative mail/API plugins without that
+structured evidence retain the conservative blocking fallback. WordPress error
+details are returned in MailPoet's transient error object; diagnostic events
+never contain these messages, recipients or message content.
+
+The observer captures structured SMTP errors before QUIT can clear them and
+restores the previous diagnostic callback and levels. The original debug output
+continues only at its original level (no output when it was disabled). Regression
+coverage includes stale errors on reused objects, nested sends, changed/multiple
+recipients, callback preservation, and hook cleanup. An SMTP acceptance followed
+by a later DSN is outside this synchronous transport contract.
